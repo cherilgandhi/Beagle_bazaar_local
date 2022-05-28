@@ -1,0 +1,365 @@
+{% extends 'base-user.html' %}
+{% load static %}
+{% load auth_tag %}
+{% block title %}Order List{% endblock title %}
+{% block css %}
+
+<!-- DataTables -->
+<link href="{% static 'assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}" rel="stylesheet">
+
+  <!-- Select2 -->
+<link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
+<style>
+    .select2-container--default .select2-selection--multiple .select2-selection__choice, 
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove{
+        color:white;
+        background-color: #3d9970;
+        border-color: #3d9970;   
+    }
+
+    .select2-container .select2-selection--single{
+        min-height:38px;
+    }
+
+</style>
+{% endblock css %}
+{% block content %}
+{% csrf_token %}
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            {% include "messages-bootstrap.html" %}
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Orders Lists</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'backoffice:index' %}">Home</a></li>
+                        <li class="breadcrumb-item active">All Orders Lists</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- .container-fluid -->
+        <div class="container-fluid">
+            {% if all_orders %}
+            <!-- .row -->
+            <div class="row">
+                <!-- .col -->
+                <div class="col-12">
+                    <!-- .card -->
+                    <div class="card">
+                        <!-- .card-header -->
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa fa-list"></i> &nbsp; Filters Block <small class="text-red"><b>Notes :</b> Please Enter the required Filter, All filters are not compulsory.</small></h3>
+                            {% comment %} <p>{{filter_categorys}},{{filter_sub_categorys}}, {{filter_companys}}, {{filter_product_names}}</p> {% endcomment %}
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.card-header -->
+
+                        <!-- .card-body -->
+                        
+                        <div class="card-body">
+                            <form method='get'>
+                                <div class="row">
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label>Order Status:</label>
+                                            <select class="select2" name="order_status" onchange="GetAllStatus(this)" id="GetAllStatusId" data-placeholder="Any" style="width: 100%;">
+                                                <option selected value="all">All Status</option>
+                                                {% if order_status_enums %}
+                                                {% for order_status_enum in order_status_enums %}
+                                                <option {% if order_status_filter %}{% if order_status_filter|str_to_int == order_status_enum.0 %} selected {% endif %}{% endif %} value="{{order_status_enum.0}}">{{order_status_enum.1}}</option>
+                                                {% endfor %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label>Account Email:</label>
+                                            <select class="select2"  name="account_email"  onchange="GetUserEmail(this)" id="GetUserEmailId" data-placeholder="Any" style="width: 100%;">
+                                                {% if filter_sub_categorys|length == 0 %}<option selected value="all">All Email</option>{% endif %}
+                                                {% if customer_emails %}
+                                                    {% for customer_email in customer_emails %}
+                                                        <option {% if order_account_email_filter %}{% if order_account_email_filter == customer_email %} selected {% endif %}{% endif %} value="{{customer_email}}">{{customer_email}}</option>
+                                                    {% endfor customer_emails %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label>Order Id:</label>
+                                            <select class="select2" name="order_id" onchange="GetOrderId(this)" id="GetOrderIdId" data-placeholder="Any" style="width: 100%;">
+                                                <option selected value="all">All Orders</option>
+                                                {% if orders_id_lists %}
+                                                    {% for orders_id_list in orders_id_lists %}
+                                                        <option {% if order_id_filter %}{% if order_id_filter == orders_id_list %} selected {% endif %}{% endif %} value="{{orders_id_list}}"># {{orders_id_list}}</option>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label>Order Date:</label>
+                                            <div class="input-group">
+                                              <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                              </div>
+                                              <input {% if order_date_filter %}value="{{order_date_filter}}"{% endif %} type="text" class="form-control" name="order_date" id="GetOrderDateId" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask>
+                                            </div>
+                                            <!-- /.input group -->
+                                          </div>
+                                          <!-- /.form group -->
+                                    </div>
+                                    <div class="col-12 col-md-6 col-lg-3 text-center">
+                                        <a href="{% url 'backoffice:all_orders' %}" class="btn btn-outline-primary mt-4">Clear Filter</a>
+                                        <button type="submit" class="btn btn-outline-success mt-4">Filter Orders</button>
+                                    </div>
+                                    <!-- /.col -->
+                                </div>
+                            </form>
+                        </div>
+                        <!-- /.card-body -->
+
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+
+            <!-- .row -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <!-- .card-header -->
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa fa-list"></i> Total Orders</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                            <div class="text-left my-2">
+                                <div class="text-left my-2">
+                                    <a class="btn btn-info disabled">
+                                      <i class="fa fa-edit"></i> Total Orders ({{orders_counts}})
+                                    </a>
+                                  </div>
+                            </div>
+                            <table id="user_details" class="table table-bordered table-striped">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Order Id.</th>
+                                        <th>Order By</th>
+                                        <th>Total Amount</th>
+                                        <th>Total Order Items</th>
+                                        <th>Order Status</th>
+                                        <th>Order Date</th>
+                                        {% if user_permissions.order_view == True %}
+                                        <th>View</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for all_order in all_orders %}
+                                    <tr>
+                                        <td>{{forloop.counter}}</td>
+                                        <td># {{all_order.product_order_id}}</td>
+                                        <td>Full Name :- <b>{{all_order.order_user.first_name}} {{all_order.order_user.last_name}}</b><br>
+                                            Account Email :- {{all_order.order_user.email}}<br>
+                                        </td>
+                                        <td>₹ {{all_order.total_transaction_amount}}</td>
+                                        <td>{{all_order.total_products_count}} Products</td>
+                                        <td>{{all_order.order_status|title}}</td>
+                                        <td>{{all_order.created_at|date:"M d, Y"}}</td>
+                                        {% if user_permissions.order_view == True %}
+                                        <td><a href="{% url 'backoffice:orders_view' all_order.order_id  %}" class="btn btn-success btn-sm">View</a></td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-footer py-2 px-3">
+                            <div class="col-md-12">    
+                                <div class="row">
+                                    <div class="col-lg-4 col-xl-3 my-2 py-0">
+                                        <p class="my-0 py-0 align-middle">Showing {{all_orders.start_index}}-{{all_orders.end_index}} of {{ all_orders.paginator.count }} results</p>
+                                    </div>
+                                    <div class="col-lg-8 col-xl-9 my-2 py-0">
+                                        {% if all_orders.has_other_pages %}
+                                            <nav aria-label="Page navigation example">
+                                                <ul class="pagination justify-content-end my-0">
+                                                    {% if all_orders.has_previous %}
+                                                        <li class="page-item"><a class="page-link" href="{% relative_url all_orders.previous_page_number 'page' request.GET.urlencode %}" tabindex="-1" aria-disabled="true">&laquo; Prev</a></li>
+                                                    {% else %}
+                                                        <li class="page-item disabled"><a class="page-link disabled" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Prev</a></li>
+                                                    {% endif %}
+    
+                                                    {% for i in all_orders.paginator.page_range %}
+                                                        {% if  i == all_orders.number %}
+                                                        <li class="page-item active"><span class="page-link">{{ i }}<span class="sr-only">(current)</span></span></li>
+    
+                                                        {% else %}
+                                                            {% if i == 0 %}
+                                                                <li class="page-item"><a class="page-link" href="{% relative_url i 'page' request.GET.urlencode %}">{{ i }}</a></li>
+                                                            {% else %}
+                                                                {% if i|add:"-5" <= all_orders.number and all_orders.number <= i|add:"5" %}
+                                                                    <li class="page-item"><a class="page-link" href="{% relative_url i 'page' request.GET.urlencode %}">{{ i }}</a></li>
+                                                                {% elif i|divisibleby:"10" or i == all_orders.paginator.num_pages %}
+                                                                    <li class="page-item"><a class="page-link" href="{% relative_url i 'page' request.GET.urlencode %}">{{ i }}</a></li>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    {% endfor %}
+    
+                                                    {% if all_orders.has_next %}
+                                                        <li class="page-item"><a class="page-link" href="{% relative_url all_orders.next_page_number 'page' request.GET.urlencode %}">Next &raquo;</a></li>
+                                                    {% else %}
+                                                        <li class="page-item disabled"><a class="page-link">Next</a></li>
+                                                    {% endif %}
+                                                </ul>
+                                            </nav>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            {% else %}
+                <h3 class="text-center">Records Not Found</h3>
+            {% endif %}
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+
+</div>
+{% endblock content %}
+{% block script %}
+
+<!-- DataTables  & Plugins -->
+<script src="{% static 'assets/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+
+<!-- Select2 -->
+<script src="{% static 'assets/plugins/select2/js/select2.full.min.js' %}"></script>
+<!-- InputMask -->
+<script src="{% static 'assets/plugins/moment/moment.min.js' %}"></script>
+<script src="{% static 'assets/plugins/inputmask/jquery.inputmask.min.js' %}"></script>
+
+<script>
+    $(function () {
+    $('.select2').select2()
+    //Money Euro
+    $('[data-mask]').inputmask()
+
+    });
+</script>
+
+
+<script>
+  $(function () {
+    $("#user_details").DataTable({
+      "responsive": true, "lengthChange": false, "autoWidth": false,"paging": false,"searching": false, "info": false
+      //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#backoffice_active_user_wrapper .col-md-6:eq(0)');
+    
+  });
+</script>
+<script>
+    function GetAllStatus(selectObject){
+        var value = selectObject.value;
+        var token = $("input[name=csrfmiddlewaretoken]").val();
+        $('#GetUserEmailId').empty();
+        $.ajax({
+            url:"{% url 'backoffice:ajax_email_by_order_status' %}",
+            type:'post',
+            data:{'order_status':value,'csrfmiddlewaretoken': token},
+            success: function(data){
+                $('#GetUserEmailId').append(data.data);
+            },
+            error: function(data){
+
+            },
+        })
+    }
+</script>
+<script>
+    function GetUserEmail(selectObject){
+        var value = selectObject.value;
+        var GetAllStatusId = $('#GetAllStatusId').val();
+        var token = $("input[name=csrfmiddlewaretoken]").val();
+        $('#GetOrderIdId').empty();
+        $.ajax({
+            url:"{% url 'backoffice:ajax_order_id_by_email' %}",
+            type:'post',
+            data:{'order_status':GetAllStatusId,'email_filter':value,'csrfmiddlewaretoken': token},
+            success: function(data){
+                $('#GetOrderIdId').append(data.data);
+            },
+            error: function(data){
+
+            },
+        })
+    }
+</script>
+<script>
+    function GetOrderId(selectObject){
+        var GetAllStatusId = $('#GetAllStatusId').val();
+        var GetUserEmailId = $('#GetUserEmailId').val();
+        var token = $("input[name=csrfmiddlewaretoken]").val();
+        var value = selectObject.value;  
+        $.ajax({
+            url:"{% url 'backoffice:ajax_order_date_by_order_id' %}",
+            type:'post',
+            data:{'order_status':GetAllStatusId,'email_filter':GetUserEmailId,'order_id_filter':value,'csrfmiddlewaretoken': token},
+            success: function(data){
+                if(data.status == 'single'){
+                    $('#GetOrderDateId').val(data.data);
+
+                }else{
+                    $('#GetOrderDateId').val('');
+                }
+
+            },
+            error: function(data){
+
+            },
+        })
+    }
+</script>
+
+{% endblock script %}

@@ -1,0 +1,197 @@
+{% extends 'base-user.html' %}
+{% load static %}
+{% load auth_tag %}
+{% block title %}Subcategory List{% endblock title %}
+{% block css %}
+
+<!-- DataTables -->
+<link href="{% static 'assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}" rel="stylesheet">
+
+  <!-- Select2 -->
+<link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
+<style>
+    .select2-container--default .select2-selection--multiple .select2-selection__choice, 
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove{
+        color:white;
+        background-color: #3d9970;
+        border-color: #3d9970;   
+    }
+
+    .select2-container .select2-selection--single{
+        min-height:38px;
+    }
+
+</style>
+{% endblock css %}
+{% block content %}
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            {% include "messages-bootstrap.html" %}
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>SubCategory Lists</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'backoffice:index' %}">Home</a></li>
+                        <li class="breadcrumb-item active">SubCategory Lists</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- .container-fluid -->
+        <div class="container-fluid">
+            <!-- .row -->
+            <div class="row">
+                <div class="col-12">
+                    {% if Subcategory_lists %}
+                    <div class="card">
+                        <!-- .card-header -->
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa fa-list"></i> Total SubCategory</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                            <div class="text-left my-2">
+                                <div class="text-left my-2">
+                                    <a class="btn btn-info disabled">
+                                      <i class="fa fa-edit"></i> Total SubCategory ({{total_subcategorys}})
+                                    </a>
+                                    {% if user_permissions and user_permissions.subcategory_create  == True %}
+                                    <a href="{% url 'backoffice:subcategory_create' %}" class="btn btn-success" target="_blank">
+                                      <i class="fa fa-edit"></i> Create SubCategory
+                                    </a>
+                                    {% endif %}
+                                  </div>
+                            </div>
+                            <table id="user_details" class="table table-bordered table-striped">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col">No.</th>
+                                        <th scope="col">SubCategory Id.</th>
+                                        <th scope="col">Category</th>
+                                        <th scope="col">SubCategory</th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Category Img</th>
+                                        <th scope="col">Created At</th>
+                                        {% if user_permissions.subcategory_update == True or  user_permissions.subcategory_delete  == True %}
+                                        <th scope="col">Edit</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for Subcategory_list in Subcategory_lists %}
+                                    <tr>
+                                        <th scope="row">{{forloop.counter}}</th>
+                                        <td>{{Subcategory_list.id}}</td>
+                                        <td>{{Subcategory_list.category.name}}</td>
+                                        <td>{{Subcategory_list.name}}</td>
+                                        <td>{{Subcategory_list.description}}</td>
+                                        <td><img style="width:100px;height:100px;" src ="{{Subcategory_list.sub_category_img|verify_url_of_market_or_backoffice}}" alt="not found"></td>
+                                        <td>{{Subcategory_list.created_at|date:"Y-m-d"}}</td>
+                                        {% if user_permissions.subcategory_update == True or  user_permissions.subcategory_delete  == True %}
+                                        <td>
+                                            {% if user_permissions.subcategory_update == True %}
+                                            <a href="{% url 'backoffice:subcategory_edit' Subcategory_list.slug %}" class="btn  my-1 mx-1 btn-success">EDIT</a>
+                                            {% endif %}
+                                            {% if user_permissions.subcategory_delete  == True %}
+                                           
+                                            <a href="javascript:void(0);" data-url="{% url 'backoffice:subcategory_delete' Subcategory_list.slug %}" data-toggle="modal" data-target="#ConfirmSubCategoryDeleteModel"    class="btn my-1 mx-1 btn-danger ConfirmSubCategoryDelete">DELETE</a>
+                                            {% endif %}
+                                        </td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endfor Subcategory_list %}
+                                </tbody>
+                            </table>
+                                 <!-- Delete Category Modal -->
+                                 <div class="modal fade" id="ConfirmSubCategoryDeleteModel" tabindex="-1" role="dialog" aria-labelledby="ConfirmSubCategoryDeleteModelLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                        <h5 class="modal-title" id="ConfirmSubCategoryDeleteModelLabel">Delete SubCategory Or Cancel. </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to Delete this SubCatrgory from table ? 
+                                        </div>
+                                        <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <a href="" id="DeleteConfirmationPopUp" class="btn btn-danger">Save changes</a>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                <!-- End Delete Category Model -->
+                        </div>
+                        <!-- /.card-body -->   
+                    </div>
+                    {% else %}
+                        <h3 class="text-center">Records Not Found</h3>
+                    {% endif %}
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+
+</div>
+{% endblock content %}
+{% block script %}
+
+<!-- DataTables  & Plugins -->
+<script src="{% static 'assets/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+
+<!-- Select2 -->
+<script src="{% static 'assets/plugins/select2/js/select2.full.min.js' %}"></script>
+
+<script>
+    $(function () {
+      $('.select2').select2()
+    });
+</script>
+
+
+<script>
+  $(function () {
+    $("#user_details").DataTable({
+      "responsive": true, "lengthChange": false, "autoWidth": false,"paging": true,"searching": true, "info": true
+      //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#backoffice_active_user_wrapper .col-md-6:eq(0)');
+    
+  });
+</script>
+
+<script>
+    $('.ConfirmSubCategoryDelete').on('click',function(){
+        var url = $(this).data('url');
+        $('#DeleteConfirmationPopUp').attr('href',url);
+    });
+</script>
+
+{% endblock script %}

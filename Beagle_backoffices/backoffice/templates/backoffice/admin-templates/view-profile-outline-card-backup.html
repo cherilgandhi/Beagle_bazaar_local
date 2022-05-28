@@ -1,0 +1,286 @@
+{% extends 'base-admin.html' %}
+{% load auth_tag %}
+{% load static %}
+{% block title %}View User Detail{% endblock title %}
+{% block css %}
+<!-- DataTables -->
+<link href="{% static 'assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}" rel="stylesheet">
+{% endblock css %}
+{% block content %}
+<div class="content-wrapper">
+	<!-- Content Header (Page header) -->
+	<section class="content-header">
+		<div class="container-fluid">
+			{% include "messages-bootstrap.html" %}
+			<div class="row mb-2">
+				<div class="col-sm-6">
+					<h1>User Profiles with permissions</h1>
+				</div>
+				<div class="col-sm-6">
+					<ol class="breadcrumb float-sm-right">
+						<li class="breadcrumb-item"><a href="{% url 'backoffice:admin_index' %}">Home</a></li>
+						<li class="breadcrumb-item"><a href="{% url 'backoffice:backoffice_users' %}">User List</a></li>
+						<li class="breadcrumb-item active">User Detail</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+		<!-- /.container-fluid -->
+	</section>
+	<!-- Main content -->
+	<section class="content">
+		<div class="container-fluid h-100">
+			<div class="row">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-header">
+							<h3 class="card-title"><i class="fa fa-list"></i> Profiles and Permissions</h3>
+						</div>
+						<!-- /.card-header -->
+						<div class="card-body">
+							<div class="row">
+								<div class="col-12 col-xl-3">
+									<div class="card card-secondary" >
+										<div class="card-header">
+											<h3 class="card-title">
+												User's Personal Detail
+											</h3>
+										</div>
+										<div class="card-body">
+											{% if user_profiles %}
+											{% for user_profile in user_profiles %}
+											<strong><i class="fas fa-user"></i> NAME</strong>
+											<p class="text-muted" >
+												{{user_profile.first_name}} {{user_profile.last_name}} 
+											</p>
+											<hr>
+											<strong><i class="fas fa-envelope"></i> EMAIL</strong>
+											<p class="text-muted">
+												{{user_profile.email}}
+											</p>
+											<hr>
+											<strong><i class="fas fa-address-book"></i> ADDRESS</strong>
+											<p class="text-muted">
+												{{user_profile.profile.unit_number}} <br>
+												{{user_profile.profile.street_address}}
+											</p>
+											<hr>
+											<strong><i class="fas fa-phone-alt"></i> CONTACT NO.</strong>
+											<p class="text-muted">
+												{{user_profile.profile.tel_number}} 
+											</p>
+											<hr>
+											<strong><i class="fas fa-users"></i> POSITION IN COMPANY</strong>
+											<p class="text-muted">
+												{{user_profile.profile.user_position}} 
+											</p>
+											<hr>
+											<strong><i class="fas fa-users"></i> ROLE</strong>
+											<p class="text-muted">
+												{{user_profile.usercredentials.user_type|account_tyes_enums_filter}} 
+											</p>
+											<hr>
+											<strong><i class="fas fa-registered"></i> REGISTER DATE</strong>
+											<p class="text-muted">
+												{{user_profile.date_joined|date:"Y/m/d"}} 
+											</p>
+											<hr>
+											<p class="text-muted">
+												{% if user_profile.is_active %}
+												<a class="btn disabled btn-outline-success btn-sm my-2 mx-2 btn-inblock"><b>ACTIVATE</b></a>
+												{% else %}
+												<a class="btn disabled btn-outline-danger btn-sm my-2 mx-2 btn-inblock"><b>DEACTIVATE</b></a>
+												{% endif %}
+												<a href="{% url 'backoffice:edit_profile' user_profile.pk %}" class="btn btn-outline-primary btn-sm my-2 mx-2 btn-inblock"><b>EDIT PROFILE</b></a>
+											</p>
+											<hr>
+											{% endfor user_profiles %}
+											{% endif %}
+										</div>
+									</div>
+								</div>
+								<div class="col-12 col-xl-9">
+									<div class="card card-secondary">
+										<div class="card-header">
+											<h3 class="card-title">Permissions</h3>
+											<div class="card-tools">
+												<button type="button" class="btn btn-tool" data-card-widget="collapse">
+												<i class="fas fa-minus"></i>
+												</button>
+											</div>
+											<!-- /.card-tools -->
+										</div>
+										<div class="card-body">
+											<div class="row">
+												<div class="col-md-12">
+
+
+													<!-- product inquiry card -->
+													<div class="card card-outline card-success collapsed-card">
+														<div class="card-header">
+															<h3 class="card-title">Product Inquiry</h3>
+															<div class="card-tools">
+																{% comment %} <button type="button" class="btn btn-tool" data-card-widget="card-refresh" data-source="widgets.html" data-source-selector="#card-refresh-content" data-load-on-init="false">
+																<i class="fas fa-sync-alt"></i>
+																</button> {% endcomment %}
+																<button type="button" class="btn btn-tool" data-card-widget="collapse">
+																<i class="fas fa-plus"></i>
+																</button>
+																<button type="button" class="btn btn-tool" data-card-widget="maximize">
+																<i class="fas fa-expand"></i>
+																</button>
+																{% comment %} <button type="button" class="btn btn-tool" data-card-widget="remove">
+																<i class="fas fa-times"></i>
+																</button> {% endcomment %}
+															</div>
+															<!-- /.card-tools -->
+														</div>
+														<!-- /.card-header -->
+														<div class="card-body">
+															<div class="row">
+																<div class="col-12">
+																	<div class="form-group clearfix">
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" id="pro_inq_per1">
+																			<label for="pro_inq_per1">VIEW SELF INQUIRY</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" id="pro_inq_per2">
+																			<label for="pro_inq_per2">VIEW ALL INQUIRY</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" id="pro_inq_per3">
+																			<label for="pro_inq_per3">VIEW FORWORD INQUIRY</label>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<!-- /.card-body -->
+													</div>
+													<!-- end product inquiry card -->
+
+
+													<!-- dummy card -->
+													<div class="card card-outline card-success collapsed-card">
+														<div class="card-header">
+															<h3 class="card-title">Dummy Inquiry</h3>
+															<div class="card-tools">
+																<button type="button" class="btn btn-tool" data-card-widget="collapse">
+																<i class="fas fa-plus"></i>
+																</button>
+																<button type="button" class="btn btn-tool" data-card-widget="maximize">
+																<i class="fas fa-expand"></i>
+																</button>
+															</div>
+															<!-- /.card-tools -->
+														</div>
+														<!-- /.card-header -->
+														<div class="card-body">
+															<div class="row">
+																<div class="col-12">
+																	<div class="form-group clearfix">
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" id="dummy1">
+																			<label for="dummy1">VIEW DUMMY INQUIRY</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" id="dummy2">
+																			<label for="dummy2">VIEW DUMMY ALL INQUIRY</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" id="dummy3">
+																			<label for="dummy3">VIEW DUMMY FORWORD INQUIRY</label>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<!-- /.card-body -->
+													</div>
+													<!-- end dummy card -->
+
+													<!-- dummy card -->
+													<div class="card card-outline card-success collapsed-card">
+														<div class="card-header">
+															<h3 class="card-title">Dummy Inquiry</h3>
+															<div class="card-tools">
+																<button type="button" class="btn btn-tool" data-card-widget="collapse">
+																<i class="fas fa-plus"></i>
+																</button>
+																<button type="button" class="btn btn-tool" data-card-widget="maximize">
+																<i class="fas fa-expand"></i>
+																</button>
+															</div>
+															<!-- /.card-tools -->
+														</div>
+														<!-- /.card-header -->
+														<div class="card-body">
+															<div class="row">
+																<div class="col-12">
+																	<div class="form-group clearfix">
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" id="dummy1">
+																			<label for="dummy1">VIEW DUMMY INQUIRY</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" id="dummy2">
+																			<label for="dummy2">VIEW DUMMY ALL INQUIRY</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" id="dummy3">
+																			<label for="dummy3">VIEW DUMMY FORWORD INQUIRY</label>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<!-- /.card-body -->
+													</div>
+													<!-- end dummy card -->
+
+
+
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- /.card-body -->
+					</div>
+					<!-- /.card -->
+				</div>
+				<!-- /.col -->
+			</div>
+			<!-- /.row -->
+		</div>
+		<!-- /.container-fluid -->
+	</section>
+	<!-- /.content -->
+</div>
+{% endblock content %}
+{% block script %}
+<!-- DataTables  & Plugins -->
+<script src="{% static 'assets/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+{% endblock script %}

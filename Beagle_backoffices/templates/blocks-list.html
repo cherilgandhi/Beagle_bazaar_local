@@ -1,0 +1,36 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+
+    <title>{% block title %}Base Page{% endblock title %}</title>
+    {% block css %}{% endblock css %}
+  </head>
+  <body>
+      <!-- this is the header of the website -->
+    {% comment %}{% include "header.html" %}{% endcomment %}
+    {% comment %}{% include "sidebar.html" %}{% endcomment %}
+    {% block content %}
+        <!-- <div class="container">
+            <div class="row">
+                <div class="col-4 bg-secondary">1</div>
+                <div class="col-4 bg-success">2</div>
+                <div class="col-4 bg-secondary">3</div>
+            </div>
+        </div> -->
+    {% endblock content %}
+    <hr><hr>
+    {% comment %}{% include "footer.html" %}{% endcomment %}
+
+
+    <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}" ></script>
+    {% block script %}{% endblock script %}
+
+  </body>
+</html>

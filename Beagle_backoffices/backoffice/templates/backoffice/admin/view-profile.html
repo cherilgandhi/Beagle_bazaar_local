@@ -1,0 +1,181 @@
+
+{% extends 'base-user.html' %}
+{% load static %}
+{% block title %}Customer List{% endblock title %}
+{% load auth_tag %}
+
+{% block css %}
+
+
+<style>
+
+    .asterisk{
+        color: red;
+        font-size: 17px;
+      }
+
+    .status-badge {
+        display:inline-block;
+        padding: 3px 5px;
+        background-color:rgba(0,0,0,0.65);
+        border-radius:5px;
+        color:white;
+    }
+
+    .approved {
+        background-color:var(--success);
+    }
+
+    .rejected {
+        background-color:var(--danger);
+    }
+
+    .pending_review {
+        background-color:var(--warning);
+        color:black;
+    }
+</style>
+{% endblock css %}
+
+{% block content %}
+ {% csrf_token %}
+<div class="content-wrapper">
+   <!-- Content Header (Page header) -->
+   <section class="content-header">
+     <div class="container-fluid">
+        {% include "messages-bootstrap.html" %}
+       <div class="row mb-2">
+         <div class="col-sm-6">
+           <h1>Approve Profile</h1>
+         </div>
+         <div class="col-sm-6">
+           <ol class="breadcrumb float-sm-right">
+             <li class="breadcrumb-item"><a href="{% url 'backoffice:admin_index' %}">Home</a></li>
+             <li class="breadcrumb-item active">Users</li>
+           </ol>
+         </div>
+       </div>
+     </div><!-- /.container-fluid -->
+   </section>
+
+   <!-- Main content -->
+   <section class="content">
+     <div class="container-fluid">
+       <div class="row">
+         <div class="col-12">
+           <div class="card">
+             <!-- /.card-header -->
+             <div class="card-body">            
+                <div class="container fluid">
+                    {{meta.is_crif_generated }}
+                    {% if meta.is_crif_generated %}
+                <!--        Generate crif report <a href="/pdf_report?report_id={{target_user.id}}" class="btn btn-link">Ok</a>-->
+                            <a href="/pdf_report?report_id={{target_user.id}}" class="btn btn-primary" >Generate crif report</a>
+                            <a href="/veloce_pdf_report?report_id={{target_user.id}}" class="btn btn-primary" >Generate Veloce Score report</a>
+                    {%endif%}
+
+                    <h1>
+                        Overview
+                        {%if complete%}
+                        ✅
+                        {%endif%}
+                    </h1>
+                    <p class="subtitle mb-5">
+                        <em>{{target_user}}</em><br>
+                        <em>updated on {{meta.updated_at|date:"d/m/Y"}}</em><br>
+                    </p>
+                    {%if meta.profile_reviewed != meta.profile_verified and meta.reject_reason%}
+                    <b>Comments:</b>
+                    <pre style="font-family: 'Hind', sans-serif; overflow:hidden;">{{meta.reject_reason}}</pre>
+                    {%endif%}
+                    {% for main in main_list %}
+                        <div>
+                            <h2>{{main.1.module_title}}</h2>
+                            <div class="status-badge {{main.0.model_status|lower|lower_replace}}">
+                                {{main.0.model_status}}
+                            </div>
+                        </div><br>
+                        <div class="form-row">
+                            {% for field in main.2.form %}
+                                {% if not field.is_hidden %}
+                                    <div class="form-group {% if not form.half or field.html_name not in form.half %} col-md-6 {% else %}col-md-6 {% endif %}">
+                                        <label for="{{field.id_for_label }}">{{field.label|safe}}</label>
+                                        {% if field.field.widget.input_type == 'file' %}
+                                            <input type="{{ field.field.widget.input_type }}" class="form-control" name="{{ field.html_name }}" value="{{ field.value }}" disabled >
+                                            {% if field.value != None %}
+                                                <a href="{{OAUTH_URL}}/media/{{ field.value }}" target="_blank" >{{ field.value }}</a>
+                                            {% else %}
+                                            <p> No Image Found !! Field is Empty </p>
+                                            {% endif %}
+                                        {% else %}
+                                            <input type="{{ field.field.widget.input_type }}" class="form-control" name="{{ field.html_name }}" value="{% if field.value != None %}{{ field.value }}{% endif %}" disabled >
+
+                                        {% endif %}
+                                        <div class="feedback_{{field.id_for_label }}"></div>
+                                        {%if field.errors%}
+                                            <div class="errorlist">{{field.errors}}</div>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    {{field}}
+                                {%endif%}
+                            {% endfor form %}
+                        </div>
+                        <br>
+                        <form class="flex col-md-6" method="POST">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+                            <input type="hidden" name="step" value="{{forloop.counter}}">
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <a href="/admin/dashboard/reject/{{target_user.id}}/{{forloop.counter0}}" class="btn btn-link">Reject</a>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="submit" class="btn btn-primary" value="Approve">
+                        </form><br><hr>
+                    {% endfor %}
+
+                    {% comment %} {%for module in modules%}
+                        {%if not meta|related_deltails:forloop.counter0 == 'Incomplete'%}
+                        <div class="module {%if forloop.counter0 == step%} active {%endif%}">
+                            <h2>{{module.title}}</h2>
+                            <div class="status-badge {{meta|related_deltails:forloop.counter0|lower_replace}}">
+                                {{meta|related_deltails:forloop.counter0}}
+                            </div>
+
+                            <br><br>
+                            {%if module.instance_title%}
+                                {%for instance in module|instance_template_tag:target_user%}
+                                    {%if instance.is_complete%}
+                                        <h3>{{module.instance_title}} {{forloop.counter}}</h3>
+                                        {% include 'backoffice/layouts/forms.html' %}     
+                                    {%endif%}
+                                {%endfor%}
+                            {%else%}
+                                {% include 'backoffice/layouts/forms.html' %}
+                            {%endif%}
+
+                            <form class="flex" method="POST">
+                                <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+                                <input type="hidden" name="step" value="{{forloop.counter}}">
+
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+
+                                <a href="/admin/dashboard/reject/{{target_user.id}}/{{forloop.counter0}}" class="btn btn-link">Reject</a>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="submit" class="btn btn-primary" value="Approve">
+                            </form>
+                        </div>
+                        {%endif%}
+                    {%endfor%} {% endcomment %}
+                </div>
+             </div>
+             <!-- /.card-body -->
+           </div>
+           <!-- /.card -->
+         </div>
+         <!-- /.col -->
+       </div>
+     </div>
+     <!-- /.container-fluid -->
+   </section>
+   <!-- /.content -->
+ </div>
+{% endblock content %}

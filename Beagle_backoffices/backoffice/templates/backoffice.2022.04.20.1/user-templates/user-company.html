@@ -1,0 +1,192 @@
+{% extends 'base-user.html' %}
+{% load static %}
+{% block title %}Company List{% endblock title %}
+{% block css %}
+
+
+<!-- DataTables -->
+<link href="{% static 'assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}" rel="stylesheet">
+
+{% endblock css %}
+{% block content %}
+
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <div class="container-fluid">
+      {% include "messages-bootstrap.html" %}
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Companies</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{% url 'backoffice:index' %}">Home</a></li>
+            <li class="breadcrumb-item active">Companies</li>
+          </ol>
+        </div>
+      </div>
+    </div><!-- /.container-fluid -->
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          {% if companys %}
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa fa-list"></i> List of Companies</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <div class="text-left my-2">
+                <a class="btn btn-info disabled my-1 mx-1">
+                  <i class="fa fa-edit"></i> Total Profile ({{total_count}})
+                </a>
+                {% if user_permissions and user_permissions.company_profile_approve_view == True %}
+                <a href="{% url 'backoffice:user_pending_profile' 'company' %}?account=2" class="btn btn-success my-1 mx-1" target="_blank">
+                  <i class="fa fa-edit"></i> Approve Profile ({{pending_count}})
+                </a>
+                {% endif %}
+              </div>
+              <table id="user_details" class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>Full Name :</th>
+                    <th>E-mail :</th>
+                    <th>Compay Details :</th>
+                    <th>Contact</th>
+                    <th>Total Product</th>
+                    <th colspan="1">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% comment %} <!-- {% for one in many %} --> {% endcomment %}
+                    {% for user_list in companys %}
+                    <tr>
+                      <td>{{user_list.auth_user.first_name|title}} {{user_list.auth_user.last_name|title}}</td>
+                      <td>{{user_list.auth_user.email}}</td>
+                      <td><b>Name: </b>{{user_list.company_details.company_name}}<br> <b>Address:</b>
+                        {% if user_list.address.unit_number %}
+                          {{user_list.address.unit_number}},
+                        {% endif %}<br>
+                        {% if user_list.address.street_address %}
+                          {{user_list.address.street_address}},
+                        {% endif %}<br>
+                        {% if user_list.address.city %}
+                          {{user_list.address.city|title}},
+                        {% endif %}
+                        {% if user_list.address.state|title %}
+                          {{user_list.address.state|title}},
+                        {% endif %} 
+                        {{user_list.address.pin_code}}</td>
+                      <td>{{user_list.phone_number.phone_number}}</td>
+                      <td>
+                        <a class="btn btn-success btn-sm" target="_blank" href="/product-list/?category=00&sub-category=00&company={{user_list.auth_user.email|lower}}&product-name=00"> Total Product ({{user_list.product_details.product_counts}})</a>
+                      </td>
+                      <td>
+                        <a  class="btn btn-info btn-sm" href="{% url 'backoffice:user_profile' user_list.auth_user.user_id %}">Views</a>
+                      </td>                     
+                    </tr>
+                     {% endfor companys %}
+                </tbody>
+              </table>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer py-2 px-3">
+              <div class="col-md-12">    
+                  <div class="row">
+                      <div class="col-lg-4 col-xl-3 my-2 py-0">
+                          <p class="my-0 py-0 align-middle">Showing {{companys.start_index}}-{{companys.end_index}} of {{ companys.paginator.count }} results</p>
+                      </div>
+                      <div class="col-lg-8 col-xl-9 my-2 py-0">   
+                        {% if companys.has_other_pages %}
+                        <nav aria-label="Page navigation example">
+                          <ul class="pagination justify-content-end my-0">
+                              {% if companys.has_previous %}
+                                  <li class="page-item"><a class="page-link" href="?page={{ companys.previous_page_number }}" tabindex="-1" aria-disabled="true">&laquo; Prev</a></li>
+                              {% else %}
+                                  <li class="page-item disabled"><a class="page-link disabled" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Prev</a></li>
+                              {% endif %}
+
+                              {% for i in companys.paginator.page_range %}
+                                  {% if  i == companys.number %}
+                                  <li class="page-item active"><span class="page-link">{{ i }}<span class="sr-only">(current)</span></span></li>
+
+                                  {% else %}
+                                      {% if i == 0 %}
+                                          <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                      {% else %}
+                                          {% if i|add:"-5" <= companys.number and companys.number <= i|add:"5" %}
+                                              <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                          {% elif i|divisibleby:"10" or i == companys.paginator.num_pages %}
+                                              <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                          {% endif %}
+                                      {% endif %}
+                                  {% endif %}
+                              {% endfor %}
+
+                              {% if companys.has_next %}
+                                  <li class="page-item"><a class="page-link" href="?page={{ companys.next_page_number }}" > Next &raquo;</a></li>
+                              {% else %}
+                                  <li class="page-item disabled"><a class="page-link">Next</a></li>
+                              {% endif %}
+                          </ul>
+                        </nav>
+                        {% endif %}
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+          {% else %}
+            <h3 class="text-center">Records Not Found</h3>
+          {% endif %}
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+    </div>
+    <!-- /.container-fluid -->
+  </section>
+  <!-- /.content -->
+</div>
+{% endblock content %}
+{% block script %}
+
+<!-- DataTables  & Plugins -->
+<script src="{% static 'assets/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+
+<script>
+  $(function () {
+    $("#user_details").DataTable({
+      "responsive": true, "lengthChange": false, "autoWidth": false,"paging": false,"searching": false, "info": false
+      //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#backoffice_active_user_wrapper .col-md-6:eq(0)');
+    $('#example2').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "responsive": true,
+    });
+  });
+</script>
+{% endblock script %}

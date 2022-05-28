@@ -1,0 +1,33 @@
+{% load static %}
+{% load auth_tag %}
+{% for field in form %}
+    {% if not field.is_hidden %}
+        <div class="form-group {% if not form.half or field.html_name not in form.half %} col-md-12 {% else %} col-md-6 {% endif %}">
+            <label for="{{field.id_for_label }}">{{field.label|safe}}</label>
+            {% if field.field.widget.input_type == 'file' %}
+                <input type="{{ field.field.widget.input_type }}" class="form-control" name="{{ field.html_name }}" value="{{ field.value }}" >
+                {% if field.value != None %}
+                    <div class="img-wrap"> 
+                        <img class="imageThumb preview-img my-2 mx-2" style="width:70px;height:70px;border:2px solid black;" alt="refresh page" src="{{field.value|else_contition_verify_url_of_market_or_backoffice}}" title="">
+                        <span class="main_img_rm">X</span>
+                    </div>
+                    {% comment %} <a class="ml-5" href="{{field.value|verify_url_of_market_or_backoffice}}" target="_blank" >View Upload Item</a> {% endcomment %}
+                {% else %}
+                {% endif %}
+            {% else %}
+            {{field}}
+            {% endif %}
+            <div class="feedback_{{field.id_for_label }}"></div>
+            {%if field.errors%}
+                <div class="errorlist">{{field.errors}}</div>
+            {% endif %}
+            {%if field.help_text%}
+                <div>
+                    {{field.help_text|safe}}
+                </div>
+            {%endif%}
+        </div>
+    {% else %}
+        {{field}}
+    {%endif%}
+{% endfor form %}

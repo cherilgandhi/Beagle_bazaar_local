@@ -1,0 +1,92 @@
+{% extends 'base-user.html' %}
+{% load widget_tweaks %}
+{% load auth_tag %}
+{% load static %}
+{% block title %}{% if '/subcategory-edit/' in request.path %}Edit {% else %}Create{% endif %}{% endblock title %}
+{% block css %}
+<style>
+  label {
+  font-size: 17px;
+  font-weight: 400;
+  }
+  .asterisk{
+  color: red;
+  font-size: 17px;
+  }
+  .errorlist{
+    color:red;
+  }
+
+  .main_img_rm{
+    display:none;
+  }
+</style>
+{% endblock css %}
+
+{% block content %}
+<div class="content-wrapper" style="min-height: 1604.44px;">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        {% include "messages-bootstrap.html" %}
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1> {% if '/subcategory-edit/' in request.path %}Edit {% else %}Create{% endif %} SubCategory</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{% url 'backoffice:index' %}">Home</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'backoffice:category_list' %}">SubCategory List</a></li>
+              <li class="breadcrumb-item active">{% if '/subcategory-edit/' in request.path %}Edit {% else %}Create{% endif %} SubCategory</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- right column -->
+                <div class="col-12">
+                    <!-- general form elements disabled -->
+                    <div class="card card-success">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-sm-10 col-md-10 col-lg-10 col-xl-8 my-3">
+                                    <form  method="post" action="{% if '/subcategory-edit/' in request.path %}{% url 'backoffice:subcategory_edit' slug %}{% else %}{% url 'backoffice:subcategory_create' %}{% endif %}"  enctype="multipart/form-data" novalidate>
+                                        {% csrf_token %} 
+                                        {% if error %}
+                                        <br>
+                                        <div class="alert alert-danger" role="alert">
+                                        {{error}}
+                                        </div>
+                                        {% elif success %}
+                                        <br>
+                                        <div class="alert alert-success" role="alert">
+                                        {{success}}
+                                        </div>
+                                        {%endif%}
+
+                                        <div class="form-row">
+                                        {% include "backoffice/layouts/form.html" %}
+                                        </div>
+                                        <button type="submit" class="btn btn-primary mt-3"> {% if '/subcategory-edit/' in request.path %}Update {% else %}Create{% endif %}</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!--/.col (right) -->
+            </div>
+        <!-- /.row -->
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+{% endblock content %}
+{% block script %}{% endblock script %}

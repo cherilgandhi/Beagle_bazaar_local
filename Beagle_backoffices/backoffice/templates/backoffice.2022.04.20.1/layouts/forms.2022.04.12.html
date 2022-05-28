@@ -1,0 +1,41 @@
+
+{%for form in module.forms%}
+{%if not form.skip_render%}
+
+<form method='POST' enctype="multipart/form-data" aria-disabled="true">
+    <fieldset disabled="disabled">
+        <div class="fields">
+            {% comment %} {{form|form_instance_passing:target_user}} {% endcomment %}
+            {% comment %} {%for field in form.instance|user_set:target_user%}
+                {{field}}
+            {% endfor %} {% endcomment %}
+            {% comment %} {% for field in form(instance=module.instance(user, index-1)[0]) %} {% endcomment %}
+            {% for field in form %}
+            
+            {% if not field.is_hidden %}
+            <div
+                class='bizcred-form-control {% if not form.half or field.html_name not in form.half %} full {% endif %}'>
+                <label for="{{field.id_for_label }}">{{field.label|safe}}</label>
+                <div class='flex {% if field.errors %} invalid {%endif%}' data-id="">
+                    {{field}}
+                </div>
+                {%if field.errors%}
+                <div class="errorlist">
+                    {{field.errors}}
+                </div>
+                {%endif%}
+                {%if field.help_text%}
+                    <div>
+                        {{field.help_text}}
+                    </div>
+                {%endif%}
+            </div>
+            {%else%}
+                {{field}}
+            {%endif%}
+            {% endfor %}
+        </div>
+    </fieldset>
+</form>
+{%endif%}
+{%endfor%}

@@ -1,0 +1,826 @@
+{% extends 'base-user.html' %}
+{% load static %}
+{% block title %}Inquiry List{% endblock title %}
+{% block css %}
+<!-- DataTables -->
+<link href="{% static 'assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}" rel="stylesheet">
+<style>
+   .error{
+   display: none;
+   margin-left: 10px;
+   }
+   .error_show{
+   color: red;
+   margin-left: 10px;
+   }
+   .removeImg {
+   position: absolute;
+   top: 2px;
+   /* right: 52px; */
+   left: 34px;
+   z-index: 100;
+   background-color: red;
+   padding: 3px 2px 2px;
+   color: #ffff;
+   font-weight: bolder;
+   cursor: pointer;
+   opacity: 0.5;
+   font-size: 14px;
+   line-height: 10px;
+   border-radius: 50%;
+   }
+   .removePdf {
+   position: absolute;
+   top: 2px;
+   /* right: 52px; */
+   left: 16px;
+   z-index: 100;
+   background-color: red;
+   padding: 3px 2px 2px;
+   color: #ffff;
+   font-weight: bolder;
+   cursor: pointer;
+   opacity: 0.5;
+   font-size: 14px;
+   line-height: 10px;
+   border-radius: 50%;
+   }
+   .main_img_rm {
+   position: absolute;
+   top: 2px;
+   left: 34px;
+   z-index: 100;
+   background-color: red;
+   padding: 3px 2px 2px;
+   color: #ffff;
+   font-weight: bolder;
+   cursor: pointer;
+   opacity: 0.5;
+   font-size: 14px;
+   line-height: 10px;
+   border-radius: 50%;
+   }
+   input[type="file"] {
+   display: block;
+   }
+   .imageThumb {
+   max-height: 23px;
+   border: 1px solid;
+   cursor: pointer;
+   }
+   .img-wrap {
+   position: relative;
+   width: 50px;
+   float: left;
+   display: inline-flex;
+   margin-top: 7px;
+   vertical-align: top;
+   }
+   .imageThumb {
+   max-height: 40px;
+   border: 1px solid;
+   cursor: pointer;
+   width: 48px;
+   height: 40px;
+   }
+   .remove{
+   position: absolute;
+   top: 2px;
+   right: 4px;
+   z-index: 100;
+   background-color: red;
+   padding: 3px 2px 2px;
+   color: #ffff;
+   font-weight: bolder;
+   cursor: pointer;
+   opacity: 0.5;
+   font-size: 14px;
+   line-height: 10px;
+   border-radius: 50%;
+   }
+   .preview-modal {
+   display: none; /* Hidden by default */
+   position: fixed; /* Stay in place */
+   z-index: 10000 !important; /* Sit on top */
+   padding-top: 100px; /* Location of the box */
+   left: 0;
+   top: 0;
+   width: 100%; /* Full width */
+   height: 100%; /* Full height */
+   overflow: auto; /* Enable scroll if needed */
+   background-color: rgb(0,0,0); /* Fallback color */
+   background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+   }
+   /* Modal Content (image) */
+   .preview-modal-content {
+   margin: auto;
+   display: block;
+   width: 80%;
+   max-width: 700px;
+   }
+   /* Caption of Modal Image */
+   #caption {
+   margin: auto;
+   display: block;
+   width: 80%;
+   max-width: 700px;
+   text-align: center;
+   color: #ccc;
+   padding: 10px 0;
+   height: 150px;
+   }
+   /* Add Animation */
+   .preview-modal-content, #caption {
+   -webkit-animation-name: zoom;
+   -webkit-animation-duration: 0.6s;
+   animation-name: zoom;
+   animation-duration: 0.6s;
+   }
+   @-webkit-keyframes zoom {
+   from {-webkit-transform:scale(0)}
+   to {-webkit-transform:scale(1)}
+   }
+   @keyframes zoom {
+   from {transform:scale(0)}
+   to {transform:scale(1)}
+   }
+   /* The Close Button */
+   .close {
+   position: absolute;
+   top: 15px;
+   right: 35px;
+   color: #c1c1c1;
+   font-size: 40px;
+   font-weight: bold;
+   transition: 0.3s;
+   }
+   .close:hover,
+   .close:focus {
+   color: #bbb;
+   text-decoration: none;
+   cursor: pointer;
+   }
+   /* 100% Image Width on Smaller Screens */
+   @media only screen and (max-width: 700px){
+   .preview-modal-content {
+   width: 100%;
+   }
+   }
+   .pdf-wrap {
+   position: relative;
+   width: 32px;
+   height: 20px;
+   float: left;
+   display: inline-block;
+   margin-top: 8px;
+   vertical-align: top;
+   margin-left: 5px;
+   }
+   .removeImg {
+   position: absolute;
+   top: 2px;
+   /* right: 52px; */
+   left: 34px;
+   z-index: 100;
+   background-color: red;
+   padding: 3px 2px 2px;
+   color: #ffff;
+   font-weight: bolder;
+   cursor: pointer;
+   opacity: 0.5;
+   font-size: 14px;
+   line-height: 10px;
+   border-radius: 50%;
+   }
+   .removePdf {
+   position: absolute;
+   top: 2px;
+   /* right: 52px; */
+   left: 16px;
+   z-index: 100;
+   background-color: red;
+   padding: 3px 2px 2px;
+   color: #ffff;
+   font-weight: bolder;
+   cursor: pointer;
+   opacity: 0.5;
+   font-size: 14px;
+   line-height: 10px;
+   border-radius: 50%;
+   }
+   .main_img_rm {
+   position: absolute;
+   top: 2px;
+   left: 34px;
+   z-index: 100;
+   background-color: red;
+   padding: 3px 2px 2px;
+   color: #ffff;
+   font-weight: bolder;
+   cursor: pointer;
+   opacity: 0.5;
+   font-size: 14px;
+   line-height: 10px;
+   border-radius: 50%;
+   }
+</style>
+{% endblock css %}
+{% block content %}
+{% csrf_token %}
+<div class="content-wrapper">
+   <section class="content-header">
+      <div class="container-fluid">
+         {% include "messages-bootstrap.html" %}
+         <div class="row mb-2">
+            <div class="col-sm-6">
+               <h1>Inquiries</h1>
+            </div>
+            <div class="col-sm-6">
+               <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="{% url 'backoffice:index' %}">Home</a></li>
+                  <li class="breadcrumb-item active">Inquiry Lists</li>
+               </ol>
+            </div>
+         </div>
+      </div>
+   </section>
+   <!-- Main content -->
+   <section class="content">
+      <div class="container-fluid">
+         <div class="row">
+            <div class="col-12">
+               <div class="card">
+                  <div class="card-header">
+                     <h3 class="card-title"><i class="fa fa-list"></i> List Of Inquiry</h3>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body">
+                     <table id="user_details" class="table table-bordered table-striped">
+                        <thead>
+                           <tr>
+                              <th>No.</th>
+                              <th>Inquirer Full Name </th>
+                              <th>Inquirer Details </th>
+                              <th>Product Disc </th>
+                              <th>Inquiry Message </th>
+                              <th>Actions </th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <div class="tab-content" id="pills-tabContent">
+                              {% if inquirys %}
+                              {% for user_list in inquirys %}
+                              <tr>
+                                 <td>{{ forloop.counter}}</td>
+                                 <td>{{user_list.auth_user.first_name|title}} {{user_list.auth_user.last_name|title}}</b><br>
+                                    {% if user_list.address.city %}
+                                    {{user_list.address.city|title}} -
+                                    {% endif %}
+                                    {% if user_list.address.state|title %}
+                                    {{user_list.address.state|title}}<br>
+                                    {% endif %}
+                                 </td>
+                                 <td>
+                                    <!-- <b>{{user_list.auth_user.first_name|title}} {{user_list.auth_user.last_name|title}}</b><br> -->
+                                    {{user_list.auth_user.email}}<br>
+                                    {% if user_list.address.city %}
+                                    {{user_list.address.city|title}} -
+                                    {% endif %}
+                                    {% if user_list.address.state|title %}
+                                    {{user_list.address.state|title}}<br>
+                                    {% endif %}
+                                    Phone Number : {{user_list.auth_user.metadata_ph_number}},{{user_list.phone_number.phone_number}}
+                                 </td>
+                                 <td>Product Name :- <b>{{user_list.product_inquiry.inq_product_name|truncatechars:25}}</b><br>
+                                    Product Vendor :- {{user_list.product_inquiry.inquiry_product_vendor_email}}<br>
+                                    Brand :- {{user_list.product_inquiry.inq_product_brand_name}}<br>
+                                    Category :- {{user_list.product_inquiry.inq_product_category}}<br>
+                                    Sub-Category :- {{user_list.product_inquiry.inq_product_subcategory}} 
+                                 </td>
+                                 <td>
+                                    Inquiry ID : {{user_list.product_inquiry.inquiry_id}}<br>
+                                    Inquiry Message : {{user_list.product_inquiry.inquiry_message}}
+                                 </td>
+                                 <td>
+                                    {% if user_list.product_inquiry.inquiry_is_product_bill_generated == 'True'  %}
+                                    <button type="button" class="btn btn-secondary" disabled>Bill Uploaded</button>
+                                    {% else %}
+                                    <button type="button" class="btn btn-primary  my-1 mx-1 book-your-sale" data-toggle="modal" data-product-name ="{{user_list.product_inquiry.inq_product_name}}" data-email-inquiry ="{{user_list.product_inquiry.inquiry_by_email}}" data-product-id="{{user_list.product_inquiry.inq_product_id}}" data-inquiry-id="{{user_list.product_inquiry.inquiry_id}}" data-target=".bd-example-modal-lg">Upload Bill</button>
+                                    <button type="button" class="btn btn-success my-1 mx-1 " data-toggle="modal" data-inquiry-id="{{user_list.product_inquiry.inquiry_id}}" data-target=".SignIn">Forward Inquiry</button>
+                                    {% endif %}
+                                 </td>
+                              </tr>
+                           </div>
+                           <!-- inquiry model  -->
+                           <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                              <div class="modal-dialog modal-lg">
+                                 <div class="modal-content">
+                                    <div class="modal-header">
+                                       <h5 class="modal-title" id="exampleModalLongTitle">GENERATE BILL</h5>
+                                       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                       <span aria-hidden="true">&times;</span>
+                                       </button>
+                                    </div>
+                                    <div class="modal-body">
+                                       <form method="post" id="billGeneratingForm" enctype="multipart/form-data">
+                                          {% csrf_token %}
+                                          <div class="form-row">
+                                             {% include 'backoffice/layouts/form.html' %}
+                                          </div>
+                                          <input type="hidden" id="started_date" />
+                                          <input type="hidden" id="ended_date" />
+                                          <hr>
+                                          <h5>Enter Bill Detail Info</h5>
+                                          <hr>
+                                          <div class="d-flex">
+                                             <div class="pl-2">
+                                                <label for="ref_inq_no">Ref. Inquiry No.:</label>
+                                                <input type="text" name="ref_inq_no" class="form-control" id="ref_inq_no" readonly>
+                                             </div>
+                                             <div class="pl-2">
+                                                <label for="inq_product_name">Product:</label>
+                                                <input type="text" name="inq_product_name" class="form-control" id="inq_product_name" readonly>
+                                             </div>
+                                             <div class="pl-2">
+                                                <label for="qty">Qty:</label>
+                                                <input type="text" name="qty" class="form-control" id="qty">
+                                             </div>
+                                             <div class="pl-2">
+                                                <label for="inq_product_price">Price:</label>
+                                                <input type="text" name="inq_product_price" class="form-control" id="inq_product_price">
+                                             </div>
+                                          </div>
+                                          <div class="d-flex">
+                                             <div class="pl-2">
+                                                <label> </label>
+                                                <label class="mt-2"> </label>
+                                             </div>
+                                             <div class="pl-2">
+                                                <label for="inq_product_gross_amt">Gross Amt:</label>
+                                                <input type="text" name="inq_product_gross_amt" class="form-control"
+                                                   id="inq_product_gross_amt">
+                                             </div>
+                                             <div class="pl-2">
+                                                <label for="inq_product_disc_amt">Disc Amt:</label>
+                                                <input type="text" name="inq_product_disc_amt" class="form-control"
+                                                   id="inq_product_disc_amt">
+                                             </div>
+                                             <div class="pl-2">
+                                                <label for="inq_product_tax">Taxes:</label>
+                                                <input type="text" name="inq_product_tax" class="form-control" id="inq_product_tax">
+                                             </div>
+                                             <div class="pl-2">
+                                                <label for="inq_product_tax">Final Amt:</label>
+                                                <input type="text" name="inq_product_final_amt" class="form-control"
+                                                   id="inq_product_final_amt">
+                                             </div>
+                                          </div>
+                                          <button type="submit" class="btn btn-success mt-2 book-sales-btn">Save</button>
+                                       </form>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <!-- end inquiry model -->
+                           {% endfor inquirys %}
+                           {% else %}
+                           <tr>
+                           <tr>
+                              <td class="text-center" colspan="4">Data Not Found</td>
+                           </tr>
+                           </tr>
+                           {% endif %}
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="modal fade SignIn forward_inquiry" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                     <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                           <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLongTitle">FORWARD INQUIRY</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                              </button>
+                           </div>
+                           <!-- <div class="modal-body"> -->
+                           <div class="card-body">
+                              <table id="backoffice_active_user" class="table table-bordered table-striped">
+                                 <thead>
+                                    <tr>
+                                       <th>User Name</th>
+                                       <!-- <th>Last name</th> -->
+                                       <th>E-mail</th>
+                                       <th>Position</th>
+                                       <th class="text-center">Send</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    {% if active_backoffice_users %}
+                                    {% for backoffice_user in active_backoffice_users %}
+                                    {% if not backoffice_user.is_superuser and backoffice_user.email != request.user.email %}
+                                    <tr>
+                                       <td>{% if backoffice_user.first_name %}{{backoffice_user.first_name}} {{backoffice_user.last_name}}{% else %} - {% endif %}</td>
+                                       <!-- <td>{% if backoffice_user.last_name %}{{backoffice_user.last_name}}{% else %} - {% endif %}</td> -->
+                                       <td>{{backoffice_user.email}}</td>
+                                       <td>{{backoffice_user.email}}</td>
+                                       <!-- {% if user_list %}
+                                          {% for backoffice_user in user_list %}
+                                          
+                                          <td>{{backoffice_user.user_position}}</td>
+                                          {% endfor user_list %}
+                                          {% endif %} -->
+                                       <td class="text-center"><a class="btn btn-success" href="/inquiry-list/?user={{backoffice_user.pk}}&inq={{user_list.product_inquiry.inquiry_id}}">FORWARD</a></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor active_backoffice_users %}
+                                    {% else %}
+                                    <tr>
+                                       <td colspan="6">No Active Users Found</td>
+                                    </tr>
+                                    {% endif %}
+                                 </tbody>
+                              </table>
+                           </div>
+                           <!-- <div class="modal fade" id="sendinquiry" tabindex="-1" role="dialog" aria-labelledby="sendinquiryModalLabel" aria-hidden="true">
+                              <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="sendinquiryModalLabel">Are you sure?</h5>
+                                    </div>
+                                    <div class="modal-body">Do you really want to send this Inquiry to  dealer ? </div>
+                                    <div class="modal-footer">
+                                        <a class="btn btn-success" id="get_id" href="">Confirm</a>
+                                        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </div>
+                              </div>
+                              </div> -->
+                        </div>
+                     </div>
+                  </div>
+                  <!-- /.card-body -->
+                  <div class="card-footer py-2 px-3">
+                     <div class="col-md-12">    
+                         <div class="row">
+                             <div class="col-lg-4 col-xl-3 my-2 py-0">
+                                 <p class="my-0 py-0 align-middle">Showing {{inquirys.start_index}}-{{inquirys.end_index}} of {{ inquirys.paginator.count }} results</p>
+                             </div>
+                             <div class="col-lg-8 col-xl-9 my-2 py-0">   
+                               {% if inquirys.has_other_pages %}
+                               <nav aria-label="Page navigation example">
+                                 <ul class="pagination justify-content-end my-0">
+                                     {% if inquirys.has_previous %}
+                                         <li class="page-item"><a class="page-link" href="?page={{ inquirys.previous_page_number }}" tabindex="-1" aria-disabled="true">&laquo; Prev</a></li>
+                                     {% else %}
+                                         <li class="page-item disabled"><a class="page-link disabled" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Prev</a></li>
+                                     {% endif %}
+       
+                                     {% for i in inquirys.paginator.page_range %}
+                                         {% if  i == inquirys.number %}
+                                         <li class="page-item active"><span class="page-link">{{ i }}<span class="sr-only">(current)</span></span></li>
+       
+                                         {% else %}
+                                             {% if i == 0 %}
+                                                 <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                             {% else %}
+                                                 {% if i|add:"-5" <= inquirys.number and inquirys.number <= i|add:"5" %}
+                                                     <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                                 {% elif i|divisibleby:"10" or i == inquirys.paginator.num_pages %}
+                                                     <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                                 {% endif %}
+                                             {% endif %}
+                                         {% endif %}
+                                     {% endfor %}
+       
+                                     {% if inquirys.has_next %}
+                                         <li class="page-item"><a class="page-link" href="?page={{ inquirys.next_page_number }}" > Next &raquo;</a></li>
+                                     {% else %}
+                                         <li class="page-item disabled"><a class="page-link">Next</a></li>
+                                     {% endif %}
+                                 </ul>
+                               </nav>
+                               {% endif %}
+                             </div>
+                         </div>
+                     </div>
+                  </div>
+                  <!-- /.card-footer -->
+               </div>
+               <!-- /.card -->
+            </div>
+            <!-- /.col -->
+         </div>
+      </div>
+      <!-- /.container-fluid -->
+   </section>
+   <!-- /.content -->
+</div>
+{% endblock content %}
+{% block script %}
+<!-- DataTables  & Plugins -->
+<script src="{% static 'assets/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'veloce-store/product-page.js' %}"></script>
+<script>
+   $(function () {
+     $("#user_details").DataTable({
+         "responsive": true, "lengthChange": false, "autoWidth": false,"paging": false,"searching": false, "info": false
+       //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+     }).buttons().container().appendTo('#backoffice_active_user_wrapper .col-md-6:eq(0)');
+     $('#example2').DataTable({
+       "paging": true,
+       "lengthChange": false,
+       "searching": false,
+       "ordering": true,
+       "info": true,
+       "autoWidth": false,
+       "responsive": true,
+     });
+   });
+</script>
+<script>
+   $(document).on("click",".book-your-sale",function() {
+     $('#billDiscountingModal').on('hidden.bs.modal', function (e) {
+         //alert('this is function visiting');
+       $(this)
+         .find("input,textarea,select")
+             .removeClass('is-valid')
+            .val('')
+            .end()
+         .find("input[type=checkbox], input[type=radio]")
+             .removeClass('is-valid')
+            .prop("checked", "")
+            .end();
+     });
+     var this_val = $(this)
+     var this_row = this_val.closest('tr');
+     var prod_id = this_val.data('product-id');
+     var inq_prod_id = this_val.data('inquiry-id');
+     var inq_exists = $('#id_inquiry option[value='+inq_prod_id+']').length;
+     if(inq_exists !=0 ) {
+         $('#id_inquiry option[value!="'+ inq_prod_id +'"]').remove();
+     }
+     else{
+         $('#id_inquiry option').remove();
+         $('#id_inquiry').append('<option value="'+ inq_prod_id +'">"'+ this_row.find('td:eq(3)').text() +'"</option>');
+     }
+     var inq_product_name = this_val.data('product-name');
+     $('.inq-prod-name').text(inq_product_name);
+     $('#id_inquired_by').val(this_val.data('email-inquiry'));
+     $('#id_inquired_by').attr('readonly','readonly');
+     $('#id_inquiry').parent().closest('.form-group').css('display', 'none');
+     $('#ref_inq_no').val(inq_prod_id);
+     $('#inq_product_name').val(inq_product_name);
+     // check scheme exists on product
+     $.ajax({
+         url: '/check-scheme-exists/',
+         data: {
+             'product_id': prod_id
+         },
+         dataType: 'json',
+         success: function (data) {
+             if (data.status){
+                 $('#id_dealers_given_finance_scheme').html("<option value=''>-------</option>" + data.scheme_value);
+                 $('#started_date').val(data.started_date);
+                 $('#ended_date').val(data.started_date);
+                 $('#id_dealers_given_finance_scheme').parent().parent().show();
+             }
+             else{
+                 $('#id_dealers_given_finance_scheme').html("<option value=''></option");
+                 $('#id_dealers_given_finance_scheme').parent().parent().hide();
+             }
+         }
+     });
+   });
+   $('#billDiscountingModal').on('hidden.bs.modal', function () {
+     $("#billGeneratingForm").validate().resetForm();
+     $("#billGeneratingForm").find('.alert-danger').remove();
+   });
+   $('#billDiscountingModal').on('hidden.bs.modal', function () {
+     $("#editbillGeneratingForm").validate().resetForm();
+   });
+   
+   //    calculate total amount on book sale form
+   var inq_qty = 0;
+   var inq_price = 0;
+   var inq_gross_amt = 0;
+   var inq_disc_amt = 0;
+   var inq_tax = 0;
+   var inq_final_amt = 0;
+   $('#inq_product_gross_amt').attr('readonly','readonly');
+   $('#inq_product_final_amt').attr('readonly','readonly');
+   $(document).on("change paste keyup","#qty",function(event) {
+     inq_qty = this.value;
+     inq_price = $('#inq_product_price').val();
+     inq_gross_amt = parseInt(inq_qty) * parseInt(inq_price)
+     inq_disc_amt = $('#inq_product_disc_amt').val();
+     inq_tax = $('#inGenerate Billq_product_tax').val();
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     if (inq_qty.length > 0 && inq_price.length > 0){
+         $('#inq_product_gross_amt').val(inq_gross_amt);
+     }
+     if($('#inq_product_gross_amt').val().length > 0 && inq_disc_amt.length > 0 && inq_tax.length > 0){
+         $('#inq_product_final_amt').val(inq_final_amt);
+     }
+     if(parseInt($('#inq_product_final_amt').val()) > 0){
+         $('#id_bill_amount').val(parseInt($('#inq_product_final_amt').val()));
+     }
+   });
+   $(document).on("change paste keyup","#inq_product_price",function(event) {
+     inq_price = this.value;
+     inq_qty = $('#qty').val();
+     inq_gross_amt = parseInt(inq_qty) * parseInt(inq_price)
+     inq_disc_amt = $('#inq_product_disc_amt').val();
+     inq_tax = $('#inq_product_tax').val();
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     if (inq_qty.length > 0 && inq_price.length > 0){
+         $('#inq_product_gross_amt').val(inq_gross_amt);
+     }
+     if($('#inq_product_gross_amt').val().length > 0 && inq_disc_amt.length > 0 && inq_tax.length > 0){
+         $('#inq_product_final_amt').val(inq_final_amt);
+     }
+     if(parseInt($('#inq_product_final_amt').val()) > 0){
+         $('#id_bill_amount').val(parseInt($('#inq_product_final_amt').val()));
+     }
+   });
+   $(document).on("change paste keyup","#inq_product_disc_amt",function(event) {
+     inq_disc_amt = this.value;
+     inq_price = $('#inq_product_price').val();
+     inq_qty = $('#qty').val();
+     inq_gross_amt = parseInt(inq_qty) * parseInt(inq_price)
+     inq_tax = $('#inq_product_tax').val();
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     if (inq_qty.length > 0 && inq_price.length > 0){
+         $('#inq_product_gross_amt').val(inq_gross_amt);
+     }
+     if($('#inq_product_gross_amt').val().length > 0 && inq_disc_amt.length > 0 && inq_tax.length > 0){
+         $('#inq_product_final_amt').val(inq_final_amt);
+     }
+     if(parseInt($('#inq_product_final_amt').val()) > 0){
+         $('#id_bill_amount').val(parseInt($('#inq_product_final_amt').val()));
+     }
+   });
+   $(document).on("change paste keyup","#inq_product_tax",function(event) {
+     inq_tax = this.value;
+     inq_disc_amt = $('#inq_product_disc_amt').val();
+     inq_price = $('#inq_product_price').val();
+     inq_qty = $('#qty').val();
+     inq_gross_amt = parseInt(inq_qty) * parseInt(inq_price)
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     if (inq_qty.length > 0 && inq_price.length > 0){
+         $('#inq_product_gross_amt').val(inq_gross_amt);
+     }
+     if($('#inq_product_gross_amt').val().length > 0 && inq_disc_amt.length > 0 && inq_tax.length > 0){
+         $('#inq_product_final_amt').val(inq_final_amt);
+     }
+     if(parseInt($('#inq_product_final_amt').val()) > 0){
+         $('#id_bill_amount').val(parseInt($('#inq_product_final_amt').val()));
+     }
+   });
+   
+   // On edit bill
+   
+   //    calculate total amount on book sale form
+   var inq_qty = 0;
+   var inq_price = 0;
+   var inq_gross_amt = 0;
+   var inq_disc_amt = 0;
+   var inq_tax = 0;
+   var inq_final_amt = 0;
+   console.log()
+   $('#id_inquired_by').attr('readonly','readonly');
+   $('#id_inq_product_gross_amt').attr('readonly','readonly');
+   $('#id_inq_product_final_amt').attr('readonly','readonly');
+   $('#id_bill_amount').attr('readonly','readonly');
+   $(document).on("change paste keypress","#id_qty",function(event) {
+     inq_qty = this.value;
+     inq_price = $('#id_inq_product_price').val();
+     inq_gross_amt = parseInt(inq_qty) * parseInt(inq_price)
+     inq_disc_amt = $('#id_inq_product_disc_amt').val();
+     inq_tax = $('#id_inq_product_tax').val();
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     if (inq_qty.length > 0 && inq_price.length > 0){
+         $('#id_inq_product_gross_amt').val(inq_gross_amt);
+     }
+     if($('#id_inq_product_gross_amt').val().length > 0 && inq_disc_amt.length > 0 && inq_tax.length > 0){
+         $('#id_inq_product_final_amt').val(inq_final_amt);
+     }
+     if(parseInt($('#id_inq_product_final_amt').val()) > 0){
+         $('#id_bill_amount').val(parseInt($('.edit-bill #id_inq_product_final_amt').val()));
+     }
+   });
+   $(document).on("change paste keyress","#id_inq_product_price",function(event) {
+     inq_price = this.value;
+     inq_qty = $('#id_qty').val();
+     inq_gross_amt = parseInt(inq_qty) * parseInt(inq_price)
+     inq_disc_amt = $('#id_inq_product_disc_amt').val();
+     inq_tax = $('#id_inq_product_tax').val();
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     if (inq_qty.length > 0 && inq_price.length > 0){
+         $('#id_inq_product_gross_amt').val(inq_gross_amt);
+     }
+     if($('#id_inq_product_gross_amt').val().length > 0 && inq_disc_amt.length > 0 && inq_tax.length > 0){
+         $('#id_inq_product_final_amt').val(inq_final_amt);
+     }
+     if(parseInt($('#id_inq_product_final_amt').val()) > 0){
+         $('#id_bill_amount').val(parseInt($('#id_inq_product_final_amt').val()));
+     }
+   });
+   $(document).on("change paste keypress","#id_inq_product_disc_amt",function(event) {
+     inq_disc_amt = this.value;
+     inq_price = $('#id_inq_product_price').val();
+     inq_qty = $('#id_qty').val();
+     inq_gross_amt = parseInt(inq_qty) * parseInt(inq_price)
+     inq_tax = $('#id_inq_product_tax').val();
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     console.log("working", inq_gross_amt, inq_gross_amt, inq_tax);
+     if(inq_gross_amt > inq_disc_amt){
+         if (inq_qty.length > 0 && inq_price.length > 0){
+             $('#id_inq_product_gross_amt').val(inq_gross_amt);
+         }
+         if($('#id_inq_product_gross_amt').val().length > 0 && inq_disc_amt.length > 0 && inq_tax.length > 0){
+             $('#id_inq_product_final_amt').val(inq_final_amt);
+         }
+         if(parseInt($('#id_inq_product_final_amt').val()) > 0){
+             $('#id_bill_amount').val(parseInt($('#id_inq_product_final_amt').val()));
+         }
+     }
+     else{
+         alert("Discount amount should not be greater than Gross Amount");
+         $(this).val(0);
+     }
+   });
+   $(document).on("change paste keypress","#id_inq_product_tax",function(event) {
+     inq_tax = this.value;
+     inq_disc_amt = $('#id_inq_product_disc_amt').val();
+     inq_price = $('#id_inq_product_price').val();
+     inq_qty = $('#id_qty').val();
+     inq_gross_amt = parseInt(inq_qty) * parseInt(inq_price)
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     inq_final_amt = (inq_gross_amt - parseInt(inq_disc_amt)) + parseInt(inq_tax);
+     if(inq_price > inq_tax){
+         if (inq_qty.length > 0 && inq_price.length > 0){
+             $('#id_inq_product_gross_amt').val(inq_gross_amt);
+         }
+         if($('#id_inq_product_gross_amt').val().length > 0 && inq_disc_amt.length > 0 && inq_tax.length > 0){
+             $('#id_inq_product_final_amt').val(inq_final_amt);
+         }
+         if(parseInt($('#id_inq_product_final_amt').val()) > 0){
+             $('#id_bill_amount').val(parseInt($('#id_inq_product_final_amt').val()));
+         }
+     }
+     else{
+         alert("Tax should not be greater than Gross Amount");
+         $(this).val(0);
+     }
+   });
+   
+   $(document).on("click",".finance-btn",function() {
+     $('#finance_url').attr('href', $(this).data('url'));
+   });
+   
+   function restrictAlpha(e){
+     var a = [];
+     var k = e.which;
+     var length = $(this).val().length;
+   
+     for (i = 48; i < 58; i++)
+         a.push(i);
+   
+     if (!(a.indexOf(k)>=0))
+         e.preventDefault();
+   }
+   
+   function restrictNo(e){
+     e = (e) ? e : window.event;
+     var charCode = (e.which) ? e.which : e.keyCode;
+     if ((charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 122)) {
+         return true;
+     }
+     else{ e.preventDefault(); }
+   }
+   
+   $('#id_billing_party_name').keypress('click', restrictNo);
+   //    $('#id_loan_emi').keypress('click', restrictAlpha);
+   
+   $('#something').click(function() {
+    location.reload();
+   });
+   
+</script>
+{% endblock script %}

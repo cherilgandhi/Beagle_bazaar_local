@@ -1,0 +1,18 @@
+{% load static %}
+{% for field in form %}
+    {% if not field.is_hidden %}
+        <div class="form-group {% if not form.half or field.html_name not in form.half %} col-md-12 {% else %} col-md-6 {% endif %}">
+            {{field}}
+            
+            <div class="feedback_{{field.id_for_label }}"></div>
+            {%if field.errors%}
+                <!-- <div class="errorlist">{{field.errors}}</div> -->
+                <div class="alert alert-danger" role="alert">
+                      {{field.errors}}
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        {{field}}
+    {%endif%}
+{% endfor form %}

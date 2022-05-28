@@ -1,0 +1,266 @@
+{% extends 'base-admin.html' %}
+{% load auth_tag %}
+{% load static %}
+{% block title %}User List{% endblock title %}
+{% block css %}
+<!-- DataTables -->
+<link href="{% static 'assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}" rel="stylesheet">
+{% endblock css %}
+{% block content %}
+{% csrf_token %}
+<div class="content-wrapper">
+   <!-- Content Header (Page header) -->
+   <section class="content-header">
+      <div class="container-fluid">
+         {% include "messages-bootstrap.html" %}
+         <div class="row mb-2">
+            <div class="col-sm-6">
+               <h1>USERS</h1>
+            </div>
+            <div class="col-sm-6">
+               <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="{% url 'backoffice:admin_index' %}">Home</a></li>
+                  <li class="breadcrumb-item active">Users</li>
+               </ol>
+            </div>
+         </div>
+      </div>
+      <!-- /.container-fluid -->
+   </section>
+   <!-- Main content -->
+   <section class="content">
+      <div class="container-fluid">
+         <div class="row">
+            <div class="col-12">
+               <div class="card">
+                  <div class="card-header">
+                     <h3 class="card-title text-green"><i class="fa fa-list"></i> List Of Active Users</h3>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body reload_on_ajax1">
+                     <table id="backoffice_active_user" class="table table-bordered table-striped">
+                        <thead>
+                           <tr>
+                              <th>Number</th>
+                              <th>First name</th>
+                              <th>Last name</th>
+                              <th>E-mail</th>
+                              <th>Reg date</th>
+                              <th>Last Login</th>
+                              <th>Account Type</th>
+                              <th>Active Users</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           {% if active_backoffice_users %}
+                           {% for backoffice_user in active_backoffice_users %}
+                           {% if not backoffice_user.is_superuser %}
+                           <tr>
+                              <td>{{forloop.counter}}</td>
+                              <td>{% if backoffice_user.first_name %}{{backoffice_user.first_name|title}}{% else %} - {% endif %}</td>
+                              <td>{% if backoffice_user.last_name %}{{backoffice_user.last_name|title}}{% else %} - {% endif %}</td>
+                              <td>{{backoffice_user.email}}</td>
+                              <td>{{backoffice_user.date_joined|date:"Y/m/d"}}</td>
+                              <td>{% if backoffice_user.last_login %}{{backoffice_user.last_login|date:"Y/m/d"}}{% else %} - {% endif %}</td>
+                              <td>{{backoffice_user.usercredentials.user_type|account_tyes_enums_filter|title}}</td>
+                              <td>
+                                 {% if backoffice_user.email != request.user.email %}<button type="button" class="btn btn-outline-danger" onClick="deactivateUser('{{backoffice_user.pk}}');">Deactivate</button>{% endif %}
+                                 <a href="{% url 'backoffice:view_profile' backoffice_user.pk %}" data-id ="{{ backoffice_user.pk }}" type="button" class="btn btn-outline-primary my-2 ">View</a>
+                                 {% comment %} <a href="{% url 'backoffice:edit_profile' backoffice_user.pk %}" type="button" class="btn btn-outline-info ">Edit</a> {% endcomment %}
+                              </td>
+                           </tr>
+                           {% endif %}
+                           {% endfor active_backoffice_users %}
+                           {% else %}
+                           <tr>
+                              <td colspan="6">No Active Users Found</td>
+                           </tr>
+                           {% endif %}
+                        </tbody>
+                     </table>
+                  </div>
+                  <!-- /.card-body -->
+               </div>
+               <!-- /.card -->
+            </div>
+            <!-- /.col -->
+         </div>
+         <div class="row">
+            <div class="col-12">
+               <div class="card">
+                  <div class="card-header">
+                     <h3 class="card-title text-danger"> <i class="fa fa-list"></i> List Of Discarded Users</h3>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body reload_on_ajax2">
+                     <table id="backoffice_non_active_user" class="table table-bordered table-striped">
+                        <thead>
+                           <tr>
+                              <th>First name</th>
+                              <th>Last name</th>
+                              <th>E-mail</th>
+                              <th>Reg date</th>
+                              <th>Last Login</th>
+                              <th>Deactive Users</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           {% if not_active_backoffice_users %}
+                           {% for backoffice_user in not_active_backoffice_users %}
+                           {% if not backoffice_user.is_superuser %}
+                           <tr>
+                              <td>{% if backoffice_user.first_name %}{{backoffice_user.first_name}}{% else %} - {% endif %}</td>
+                              <td>{% if backoffice_user.last_name %}{{backoffice_user.last_name}}{% else %} - {% endif %}</td>
+                              <td>{{backoffice_user.email}}</td>
+                              <td>{{backoffice_user.date_joined|date:"Y/m/d"}}</td>
+                              <td>{% if backoffice_user.last_login %}{{backoffice_user.last_login|date:"Y/m/d"}}{% else %} - {% endif %}</td>
+                              <td>
+                                 {% if backoffice_user.email != request.user.email %}<button type="button" class="btn btn-outline-success" onClick="activeUsers('{{backoffice_user.pk}}');">Activate</button>{% endif %}
+                                 <a href="{% url 'backoffice:view_profile' backoffice_user.pk %}" data-id ="{{ backoffice_user.pk }}" type="button" class="btn btn-outline-primary ">View</a>
+                              </td>
+                           </tr>
+                           {% endif %}
+                           {% endfor not_active_backoffice_users %}
+                           {% else %}
+                           <tr>
+                              <td colspan="6" class="text-center">No Discarded Users Found</td>
+                           </tr>
+                           {% endif %}
+                        </tbody>
+                     </table>
+                  </div>
+                  <!-- /.card-body -->
+               </div>
+               <!-- /.card -->
+            </div>
+            <!-- /.col -->
+         </div>
+      </div>
+      <!-- /.container-fluid -->
+   </section>
+   <!-- /.content -->
+</div>
+{% endblock content %}
+{% block script %}
+<!-- DataTables  & Plugins -->
+<script src="{% static 'assets/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+<script>
+   function deactivateUser(UserId)
+   {
+       event.preventDefault();
+       var token = $("input[name=csrfmiddlewaretoken]").val();
+       if(confirm("Do you really want to deactivate this User?")) {
+         $.ajax({
+           url:'{% url "backoffice:backoffice_users" %}',
+           type:'post',
+           data:{'id':UserId,'status':'deactivate','csrfmiddlewaretoken': token},
+           success : function(data){
+             var send_msg = " <div class='alert alert-"+data.alart_class+" alert-dismissible mt-3' role='alert'>"+
+                               "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>"+
+                                   "<span aria-hidden='true'>×</span>"+
+                               "</button>"+ data.messages
+                            "</div>";
+                           $('.page-message').html(send_msg);
+             
+             $(".reload_on_ajax1").load(location.href + " .reload_on_ajax1 > table");
+             $(".reload_on_ajax2").load(location.href + " .reload_on_ajax2 > table");
+           },
+           error : function(data){
+             location.reload();
+             var send_msg = " <div class='alert alert-"+data.alart_class+" alert-dismissible mt-3' role='alert'>"+
+                               "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>"+
+                                   "<span aria-hidden='true'>×</span>"+
+                               "</button>"+ data.messages
+                           "</div>";
+                           $('.page-message').html(send_msg);
+           }
+         });
+       }else{
+          return false;
+       }
+   }
+</script>
+<script>
+   function activeUsers(UserId)
+   {
+       var token = $("input[name=csrfmiddlewaretoken]").val();
+       var confirmText = "Do you really want to Activate this User?";
+       if(confirm("Do you really want to Activate this User?")) {
+         $.ajax({
+           url:'{% url "backoffice:backoffice_users" %}',
+           type:'post',
+           data:{'id':UserId,'status':'activate','csrfmiddlewaretoken': token},
+           success : function(data){
+             var send_msg = " <div class='alert alert-"+data.alart_class+" alert-dismissible' role='alert'>"+
+                               "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>"+
+                                   "<span aria-hidden='true'>×</span>"+
+                               "</button>"+ data.messages
+                            "</div>";
+                           $('.page-message').html(send_msg);
+   
+           $(".reload_on_ajax1").load(location.href + " .reload_on_ajax1 > table");
+           $(".reload_on_ajax2").load(location.href + " .reload_on_ajax2 > table");
+   
+           },
+           error : function(data){
+             var send_msg = " <div class='alert alert-"+data.alart_class+" alert-dismissible' role='alert'>"+
+                               "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>"+
+                                   "<span aria-hidden='true'>×</span>"+
+                               "</button>"+ data.messages
+                           "</div>";
+                           $('.page-message').html(send_msg);
+           }
+         });
+       }else{
+          return false;
+       }
+   }
+</script>
+<script>
+   $(function () {
+     $("#backoffice_active_user").DataTable({
+       "responsive": true, "lengthChange": false, "autoWidth": false,
+       //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+     }).buttons().container().appendTo('#backoffice_active_user_wrapper .col-md-6:eq(0)');
+     $('#example2').DataTable({
+       "paging": true,
+       "lengthChange": false,
+       "searching": false,
+       "ordering": true,
+       "info": true,
+       "autoWidth": false,
+       "responsive": true,
+     });
+   });
+</script>
+<script>
+   $(function () {
+     $("#backoffice_non_active_user").DataTable({
+       "responsive": true, "lengthChange": false, "autoWidth": false,
+       //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+     }).buttons().container().appendTo('#backoffice_non_active_user_wrapper .col-md-6:eq(0)');
+     $('#example2').DataTable({
+       "paging": true,
+       "lengthChange": false,
+       "searching": false,
+       "ordering": true,
+       "info": true,
+       "autoWidth": false,
+       "responsive": true,
+     });
+   });
+</script>
+{% endblock script %}

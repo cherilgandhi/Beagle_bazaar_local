@@ -1,0 +1,207 @@
+{% extends 'base-user.html' %}
+{% load static %}
+{% block title %}Customer List{% endblock title %}
+{% load auth_tag %}
+
+{% block css %}
+<!-- <link rel="stylesheet" href="/static/backoffice/sidebar.css">
+
+<style>
+    .modules {
+        padding: 25px;
+    }
+
+    h2,
+    h1 {
+        margin-bottom: 0;
+        margin-top: 25px;
+    }
+</style> -->
+{% endblock css %}
+
+
+{% block content %}
+
+<div class="container fluid">
+    {{meta.is_crif_generated }}
+    {% if meta.is_crif_generated %}
+<!--        Generate crif report <a href="/pdf_report?report_id={{target_user.id}}" class="btn btn-link">Ok</a>-->
+            <a href="/pdf_report?report_id={{target_user.id}}" class="btn btn-primary" >Generate crif report</a>
+            <a href="/veloce_pdf_report?report_id={{target_user.id}}" class="btn btn-primary" >Generate Veloce Score report</a>
+    {%endif%}
+
+    <h1>
+        Overview
+        {%if complete%}
+        ✅
+        {%endif%}
+    </h1>
+    <p class="subtitle">
+        <em>updated on {{meta.updated_at|date:"d/m/Y"}}</em><br>
+        <em>{{target_user}}</em>
+    </p>
+    {%if meta.profile_reviewed != meta.profile_verified and meta.reject_reason%}
+    <b>Comments:</b>
+    <pre style="font-family: 'Hind', sans-serif; overflow:hidden;">{{meta.reject_reason}}</pre>
+    {%endif%}
+
+
+    {% for form in main_list %}
+        {% for field in form %}
+            {{field}}<br>
+        {% endfor %}
+        <br>
+        <form class="flex" method="POST">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+            <input type="hidden" name="step" value="{{forloop.counter}}">
+
+            &nbsp;&nbsp;&nbsp;&nbsp;
+
+            <a href="/admin/dashboard/admin/reject/{{target_user.id}}/{{forloop.counter0}}" class="btn btn-link">Reject</a>
+            {% comment %} <a href="/{{forloop.counter0}}" class="btn btn-link">Reject</a> {% endcomment %}
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="submit" class="btn btn-primary" value="Approve">
+        </form><br><hr>
+
+    {% endfor %}
+
+    
+    {%for module in modules%}
+    
+
+    {% comment %} {%set status = meta.get_status(loop.index-1)%} {% endcomment %}
+    {% comment %} {{meta|related_deltails:forloop.counter0}} {% endcomment %}
+    
+    {% comment %} {{status}} {% endcomment %}
+    
+    {% comment %} {{status}} {% endcomment %}
+    {% comment %} {{user.id|get_status:status}} {% endcomment %}
+
+    {% comment %} {% loop_index user.id|get_status:status as status %} {% endcomment %}
+
+    
+    {%if not meta|related_deltails:forloop.counter0 == 'Incomplete'%}
+    <div class="module {%if forloop.counter0 == step%} active {%endif%}">
+        <h2>{{module.title}}</h2>
+<!--        {%if module.level > 1%}-->
+<!--        <div class="status-badge">-->
+<!--            Optional-->
+<!--        </div>-->
+<!--        {%endif%}-->
+        <div class="status-badge {{meta|related_deltails:forloop.counter0|lower_replace}}">
+            {{meta|related_deltails:forloop.counter0}}
+        </div>
+
+        <br><br>
+        {%if module.instance_title%}
+            {%for instance in module|instance_template_tag:target_user%}
+                {%if instance.is_complete%}
+                    <h3>{{module.instance_title}} {{forloop.counter}}</h3>
+                    {% include 'backoffice/layouts/forms.html' %}     
+                {%endif%}
+            {%endfor%}
+        {%else%}
+            {% include 'backoffice/layouts/forms.html' %}
+        {%endif%}
+
+        <form class="flex" method="POST">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+            <input type="hidden" name="step" value="{{forloop.counter}}">
+
+            &nbsp;&nbsp;&nbsp;&nbsp;
+
+            <a href="/admin/dashboard/admin/reject/{{target_user.id}}/{{forloop.counter0}}" class="btn btn-link">Reject</a>
+            {% comment %} <a href="/{{forloop.counter0}}" class="btn btn-link">Reject</a> {% endcomment %}
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="submit" class="btn btn-primary" value="Approve">
+        </form>
+    </div>
+    {%endif%}
+    {%endfor%}
+</div>
+{% endblock content %}
+
+{% comment %} 
+
+@login_required
+def admin_view(request, uid):
+    # if not request.user.is_superuser:
+        # return redirect('/')
+    user = bizcred_models.auth_user.AuthUser.objects.using('bizcred_db').get(id=uid)
+    # print(user)
+    meta = user.metadata
+    mask = form_map.MASKS[meta.account_type]
+    modules = form_map.FORM_MAP[meta.account_type]
+    if request.method == 'POST':
+        step = request.POST.get("step")
+        # print('steps',step)
+        status = bizcred_methods.level_status(request, modules, meta)
+        for i in status:
+            if i['level'] == modules[int(step) - 2].level and (i['verified_count'] == 1 or i['verified_count'] == 0):
+                try:
+                    email_data = mods.level_email.LevelEmail.objects.using('bizcred_db').get(user=user, level=modules[int(step) - 2].level,
+                                                                         is_approved=False)
+                except:
+                    email_data = ''
+                if email_data:
+                    bizcred_methods.level_approved_email(user, modules[int(step) - 2].level, meta.account_type, email_data,
+                                                 request)
+        if step and step.isnumeric():
+            meta.approve(int(step) - 1)
+            if int(step) == 8:
+                meta.approve(int(step) - 1)
+        # print('***** CRIF_GEN ****', settings.CRIF_GEN)
+        # if settings.CRIF_GEN == True:
+        #     if mods.metadata.Metadata.objects.using('bizcred_db').filter(user_id=uid, profile_verified=1023):
+        #         bizcred_methods.crif_score(request, meta)
+        #     crif_user = mods.metadata.Metadata.objects.using('bizcred_db').filter(user_id=uid, profile_reviewed=4095)
+        #     print('crif generate ******** ----------------->', crif_user)
+        #     if crif_user:
+        #         if not meta.is_crif_generated:
+        #             print('crif generate ----------------->', crif_user)
+        #             report_id, order_id, user_data = bizcred_crif_commercial.crif_institution_stage_1(request, uid, meta)
+        #             time.sleep(10)
+        #             data = bizcred_crif_commercial.crif_institution_stage_2(request, report_id, order_id, user_data)
+        #             time.sleep(10)
+        #             response = bizcred_crif_commercial.crif_institution_stage_3(request,report_id, order_id, user_data)
+    # print(modules)
+    # print(meta)
+    # print(meta.equals_mask(mask))
+    # print(user)
+    
+    main_list= []
+    main_form_list = []
+    modules_instances = form_map.FORM_MAP[meta.account_type]
+    # print(modules_instances)
+    for modules_instances in modules_instances:
+        # print(modules_instances)
+        form_list = []
+        for form in modules_instances.forms:
+            user = bizcred_models.auth_user.AuthUser.objects.using('bizcred_db').get(id=uid)
+            index= 1
+            if not form.skip_render:
+                form = form(instance=modules_instances.instance(user,index-1)[0])
+                # print(form)
+                form_list.append(form)
+        main_form_list.append(form_list)
+        main_list.append(main_form_list)
+    # print(main_list)
+    
+    # for for_lst in main_form_list:
+    #     for mod in for_lst:
+    #         print(mod)
+        # print(type(for_lst))
+        
+    return render(request, 'backoffice/admin/view-profile.html',{
+        'modules': modules,
+        'meta': meta,
+        'complete': meta.equals_mask(mask),
+        'target_user': user,
+        'main_list' :main_form_list,
+    })
+    
+    
+
+
+
+{% endcomment %}

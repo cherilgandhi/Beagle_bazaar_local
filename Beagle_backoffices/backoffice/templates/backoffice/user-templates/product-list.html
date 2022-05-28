@@ -1,0 +1,384 @@
+{% extends 'base-user.html' %}
+{% load static %}
+{% load auth_tag %}
+{% block title %}Product List{% endblock title %}
+{% block css %}
+
+<!-- DataTables -->
+<link href="{% static 'assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}" rel="stylesheet">
+
+  <!-- Select2 -->
+<link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
+<style>
+    .select2-container--default .select2-selection--multiple .select2-selection__choice, 
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove{
+        color:white;
+        background-color: #3d9970;
+        border-color: #3d9970;   
+    }
+
+    .select2-container .select2-selection--single{
+        min-height:38px;
+    }
+
+</style>
+{% endblock css %}
+{% block content %}
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            {% include "messages-bootstrap.html" %}
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Products Lists</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'backoffice:index' %}">Home</a></li>
+                        <li class="breadcrumb-item active">Products Lists</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- .container-fluid -->
+        <div class="container-fluid">
+            <!-- .row -->
+            <div class="row">
+                <!-- .col -->
+                <div class="col-12">
+                    <!-- .card -->
+                    <div class="card">
+                        <!-- .card-header -->
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa fa-list"></i> &nbsp; Filters Block</h3>
+                            {% comment %} <p>{{filter_categorys}},{{filter_sub_categorys}}, {{filter_companys}}, {{filter_product_names}}</p> {% endcomment %}
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.card-header -->
+
+                        <!-- .card-body -->
+                        
+                        <div class="card-body">
+                            <form method='get'>
+                                <div class="row">
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label>Category:</label>
+                                            <select class="select2" name="category" id="category-field-id" data-placeholder="Any" style="width: 100%;">
+                                                <option class="GetCategory" selected value="00">All Category</option>
+                                                {% if categories %}
+                                                    {% for category in categories %}
+                                                        <option {% if filter_categorys %}{% if filter_categorys|str_to_int == category.id %} selected {% endif %}{% endif %} class="GetCategory" value="{{category.id}}">{{category.name}}</option>
+                                                    {% endfor categories %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label>Sub Category:</label>
+                                            <select class="select2" name="sub-category" id='sub-category-field-id' multiple="multiple" data-placeholder="Select Multiple SubCategory" style="width: 100%;">
+                                                {% if filter_sub_categorys|length == 0 %}<option selected class="GetSubCategory" value="00">All Sub Category</option>{% endif %}
+                                                <option class="GetSubCategory" {% if filter_sub_categorys %}{% if 00 in filter_sub_categorys|str_to_int_list %}selected{% endif %}{% endif %} value="00">All Sub Category</option>
+                                                {% if sub_categories %}
+                                                {% for sub_category in sub_categories %}
+                                                    <option class="GetSubCategory" {% if filter_sub_categorys %}{% if sub_category.id in filter_sub_categorys|str_to_int_list %}selected{% endif %}{% endif %} value="{{sub_category.id}}">{{sub_category.name}}</option>
+                                                {% endfor sub_categories %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label>Company:</label>
+                                            <select class="select2" name="company" id="company-field-id" data-placeholder="Any" style="width: 100%;">
+                                                <option value="00" selected>All Company</option>
+                                                {% if company_lists %}
+                                                    {% for company_list in company_lists %}
+                                                        {% for key,value in company_list.items %}
+                                                            <option class="GetCompany" {% if filter_companys %}{% if key == filter_companys %}selected{% endif %}{% endif %} value="{{key}}">{{value}}</option>
+                                                        {% endfor %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label>Product Name:</label>
+                                            <select class="select2" name="product-name" id="product-field-id" data-placeholder="Any" style="width: 100%;">
+                                                <option class="GetProduct" selected value="00">All Product</option>
+                                                {% if products %}
+                                                    {% for product in products %}
+                                                        <option class="GetProduct" {% if filter_product_names %}{% if product.id == filter_product_names|str_to_int %}selected{% endif %}{% endif %} value="{{product.id}}">{{product.name}}</option>
+                                                    {% endfor products %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-lg-3 text-center">
+                                        <a href="{% url 'backoffice:product_list' %}" class="btn btn-outline-primary mt-4">Clear Filter</a>
+                                        <button type="submit" class="btn btn-outline-success mt-4">Filter Product</button>
+                                    </div>
+                                    <!-- /.col -->
+                                </div>
+                            </form>
+                        </div>
+                        <!-- /.card-body -->
+
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+
+            <!-- .row -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <!-- .card-header -->
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa fa-list"></i> Total portals products</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                            <div class="text-left my-2">
+                                <div class="text-left my-2">
+                                    <a class="btn btn-info disabled">
+                                      <i class="fa fa-edit"></i> Total Products ({{products_counts}})
+                                    </a>
+                                    {% if user_permissions and user_permissions.product_create == True %}
+                                    <a href="{% url 'backoffice:create_product' %}" class="btn btn-success" target="_blank">
+                                      <i class="fa fa-edit"></i> Create Product
+                                    </a>
+                                    {% endif %}
+                                  </div>
+                            </div>
+                            <table id="user_details" class="table table-bordered table-striped">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col">No.</th>
+                                        <th scope="col">Id.</th>
+                                        <th scope="col">Upload Date</th>
+                                        <th scope="col">product Owner</th>
+                                        <th scope="col">Product Name</th>
+                                        <th scope="col">Product Brand</th>
+                                        <th scope="col">Product Categies</th>
+                                        <th scope="col">Product Sub Categies</th>
+                                        <th scope="col">Is Featured Product</th>
+                                        {% if user_permissions.product_view == True or user_permissions.product_update == True  %}  
+                                        <th scope="col">Actions </th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if products %}
+                                    {% for product in products %}
+                                    <tr>
+                                        <th scope="row">{{forloop.counter0 |add:products.start_index}}</th>
+                                        <td>{{product.id}}</td>
+                                        <td>{{product.created_at|date:"Y-m-d"}}</td>
+                                        <td>{{product.vendor.first_name}} {{product.vendor.last_name}}</td>
+                                        <td>{{product.name}}</td>
+                                        <td>{{product.brand_name}}</td>
+                                        <td>{{product.category.name}}</td>
+                                        <td>{{product.sub_category.name}}</td>
+                                        <td>{{product.is_featured_product}}</td>
+                                        {% if user_permissions.product_view == True or user_permissions.product_update == True  %}   
+                                        <td>
+                                            {% if user_permissions.product_view == True %}
+                                            <a href="{{MARKET_URL}}/product/{{product.slug}}/" target="_blank" class="btn  my-1 mx-1 btn-success">
+                                                VIEW
+                                           
+                                            </a>
+                                            {% endif %} 
+                                            {% if user_permissions.product_update == True %}    
+                                            <a href="{% url 'backoffice:edit_product' product.pk %}"  class="btn my-1 mx-1 btn-info">
+                                                EDIT
+                                            </a>
+                                            {% endif %}
+
+                                        </td>
+
+                                        {% endif %}
+                                       
+                                    </tr>
+                                    {% endfor products %}
+                                    {% else %}
+                                    <tr>
+                                        <td class="text-center" colspan="10">Data Not Found</td>
+                                    </tr> 
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-footer py-2 px-3">
+                            <div class="col-md-12">    
+                                <div class="row">
+                                    <div class="col-lg-4 col-xl-3 my-2 py-0">
+                                        <p class="my-0 py-0 align-middle">Showing {{products.start_index}}-{{products.end_index}} of {{ products.paginator.count }} results</p>
+                                    </div>
+                                    <div class="col-lg-8 col-xl-9 my-2 py-0">
+                                        {% if products.has_other_pages %}
+                                            <nav aria-label="Page navigation example">
+                                                <ul class="pagination justify-content-end my-0">
+                                                    {% if products.has_previous %}
+                                                        <li class="page-item"><a class="page-link" href="{% relative_url products.previous_page_number 'page' request.GET.urlencode %}" tabindex="-1" aria-disabled="true">&laquo; Prev</a></li>
+                                                    {% else %}
+                                                        <li class="page-item disabled"><a class="page-link disabled" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Prev</a></li>
+                                                    {% endif %}
+    
+                                                    {% for i in products.paginator.page_range %}
+                                                        {% if  i == products.number %}
+                                                        <li class="page-item active"><span class="page-link">{{ i }}<span class="sr-only">(current)</span></span></li>
+    
+                                                        {% else %}
+                                                            {% if i == 0 %}
+                                                                <li class="page-item"><a class="page-link" href="{% relative_url i 'page' request.GET.urlencode %}">{{ i }}</a></li>
+                                                            {% else %}
+                                                                {% if i|add:"-5" <= products.number and products.number <= i|add:"5" %}
+                                                                    <li class="page-item"><a class="page-link" href="{% relative_url i 'page' request.GET.urlencode %}">{{ i }}</a></li>
+                                                                {% elif i|divisibleby:"10" or i == products.paginator.num_pages %}
+                                                                    <li class="page-item"><a class="page-link" href="{% relative_url i 'page' request.GET.urlencode %}">{{ i }}</a></li>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    {% endfor %}
+    
+                                                    {% if products.has_next %}
+                                                        <li class="page-item"><a class="page-link" href="{% relative_url products.next_page_number 'page' request.GET.urlencode %}">Next &raquo;</a></li>
+                                                    {% else %}
+                                                        <li class="page-item disabled"><a class="page-link">Next</a></li>
+                                                    {% endif %}
+                                                </ul>
+                                            </nav>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+
+</div>
+{% endblock content %}
+{% block script %}
+
+<!-- DataTables  & Plugins -->
+<script src="{% static 'assets/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+
+<!-- Select2 -->
+<script src="{% static 'assets/plugins/select2/js/select2.full.min.js' %}"></script>
+
+<script>
+    $(function () {
+      $('.select2').select2()
+    });
+</script>
+
+
+<script>
+  $(function () {
+    $("#user_details").DataTable({
+      "responsive": true, "lengthChange": false, "autoWidth": false,"paging": false,"searching": false, "info": false
+      //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#backoffice_active_user_wrapper .col-md-6:eq(0)');
+    
+  });
+</script>
+
+<script>
+
+    //.GetCategory
+    $('#category-field-id').on("select change", function() {
+        cat_id = $('.GetCategory:selected').val();
+        //console.log(cat_id);
+        $('#sub-category-field-id').empty();
+        $.ajax({
+            url: "{% url 'backoffice:ajax_category' %}",
+            type :'get',
+            data:{'cat_id':cat_id},
+            success: function(data){
+                console.log(data.sub_category);
+                $('#sub-category-field-id').append(data.sub_category);
+            },
+            error: function(data){
+                console.log(data);
+            },
+        })  
+    });
+
+    $("#sub-category-field-id").on("select2:select select2:unselect", function (e) {
+        var items = $(this).val();       
+        //console.log(items);
+        //console.log($.type(items));
+        $('#company-field-id').empty();
+        $.ajax({
+            url: "{% url 'backoffice:ajax_subcategory' %}",
+            type :'get',
+            data:{'sub_cat_id':items},
+            success: function(data){
+                $('#company-field-id').append(data.all_company);
+            },
+            error: function(data){
+            },
+        });
+    
+    });
+
+    $('#company-field-id').on("select change", function() {
+        company_email = $(this).val();
+        var sub_category = $('#sub-category-field-id').val();
+        console.log(company_email,sub_category);
+        $('#product-field-id').empty();
+        $.ajax({
+            url: "{% url 'backoffice:ajax_company' %}",
+            type :'get',
+            data:{'company_email':company_email,'sub_category':sub_category},
+            success: function(data){
+                //console.log(data.all_product);
+                $('#product-field-id').append(data.all_product);
+            },
+            error: function(data){
+                console.log(data);
+            },
+        })  
+    });
+
+    
+</script>
+
+{% endblock script %}

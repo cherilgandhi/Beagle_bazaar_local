@@ -1,0 +1,622 @@
+{% extends 'base-user.html' %}
+{% load widget_tweaks %}
+{% load auth_tag %}
+{% load static %}
+{% block title %}{% if '/product-edit/' in request.path %}Edit Product{% else %}Create Product{% endif %}{% endblock title %}
+{% block css %}
+<style>
+  .error{
+      display: none;
+      margin-left: 10px;
+  }
+
+  .error_show{
+      color: red;
+      margin-left: 10px;
+  }
+
+  .removeImg {
+      position: absolute;
+      top: 2px;
+      /* right: 52px; */
+      left: 34px;
+      z-index: 100;
+      background-color: red;
+      padding: 3px 2px 2px;
+      color: #ffff;
+      font-weight: bolder;
+      cursor: pointer;
+      opacity: 0.5;
+      font-size: 14px;
+      line-height: 10px;
+      border-radius: 50%;
+  }
+
+  .removePdf {
+      position: absolute;
+      top: 2px;
+      /* right: 52px; */
+      left: 16px;
+      z-index: 100;
+      background-color: red;
+      padding: 3px 2px 2px;
+      color: #ffff;
+      font-weight: bolder;
+      cursor: pointer;
+      opacity: 0.5;
+      font-size: 14px;
+      line-height: 10px;
+      border-radius: 50%;
+  }
+
+
+  .main_img_rm {
+      position: absolute;
+      top: 2px;
+      left: 34px;
+      z-index: 100;
+      background-color: red;
+      padding: 3px 2px 2px;
+      color: #ffff;
+      font-weight: bolder;
+      cursor: pointer;
+      opacity: 0.5;
+      font-size: 14px;
+      line-height: 10px;
+      border-radius: 50%;
+  }
+
+  .main_video_rm {
+      position: absolute;
+      top: 2px;
+      left: 135px;
+      z-index: 100;
+      background-color: red;
+      padding: 3px 2px 2px;
+      color: #ffff;
+      font-weight: bolder;
+      cursor: pointer;
+      opacity: 0.5;
+      font-size: 14px;
+      line-height: 10px;
+      border-radius: 50%;
+  }
+
+  input[type="file"] {
+    display: block;
+  }
+  .imageThumb {
+    max-height: 23px;
+    border: 1px solid;
+    cursor: pointer;
+  }
+
+  .img-wrap {
+      position: relative;
+      width: 50px;
+      float: left;
+      display: inline-flex;
+      margin-top: 7px;
+      vertical-align: top;
+  }
+  .img-wrap-video {
+      position: relative;
+      width: 152px;
+      float: left;
+      display: inline-flex;
+      margin-top: 7px;
+      vertical-align: top;
+  }
+  .imageThumb {
+      max-height: 40px;
+      border: 1px solid;
+      cursor: pointer;
+      width: 48px;
+      height: 40px;
+  }
+  .videoThumb {
+      max-height: 100px;
+      border: 1px solid;
+      cursor: pointer;
+      width: 150px;
+      height: 100px;
+  }
+  .remove{
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      z-index: 100;
+      background-color: red;
+      padding: 3px 2px 2px;
+      color: #ffff;
+      font-weight: bolder;
+      cursor: pointer;
+      opacity: 0.5;
+      font-size: 14px;
+      line-height: 10px;
+      border-radius: 50%;
+  }
+  .remove-video{
+      position: absolute;
+      top: 2px;
+      left: 135px;
+      z-index: 100;
+      background-color: red;
+      padding: 3px 2px 2px;
+      color: #ffff;
+      font-weight: bolder;
+      cursor: pointer;
+      opacity: 0.5;
+      font-size: 14px;
+      line-height: 10px;
+      border-radius: 50%;
+  }
+  .preview-modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 10000 !important; /* Sit on top */
+      padding-top: 100px; /* Location of the box */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgb(0,0,0); /* Fallback color */
+      background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+      }
+
+  /* Modal Content (image) */
+  .preview-modal-content {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 700px;
+  }
+
+  /* Caption of Modal Image */
+  #caption {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 700px;
+  text-align: center;
+  color: #ccc;
+  padding: 10px 0;
+  height: 150px;
+  }
+
+  /* Add Animation */
+  .preview-modal-content, #caption {
+  -webkit-animation-name: zoom;
+  -webkit-animation-duration: 0.6s;
+  animation-name: zoom;
+  animation-duration: 0.6s;
+  }
+
+  @-webkit-keyframes zoom {
+  from {-webkit-transform:scale(0)}
+  to {-webkit-transform:scale(1)}
+  }
+
+  @keyframes zoom {
+  from {transform:scale(0)}
+  to {transform:scale(1)}
+  }
+
+  /* The Close Button */
+  .close {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #c1c1c1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+  }
+
+  .close:hover,
+  .close:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+  }
+
+  /* 100% Image Width on Smaller Screens */
+  @media only screen and (max-width: 700px){
+  .preview-modal-content {
+      width: 100%;
+  }
+  }
+  label.required:after {
+      content: "*";
+      color: #da1113;
+  }
+  .curreny-cap{
+      text-transform:capitalize !important
+  }
+
+
+</style>
+
+{% endblock css %}
+
+{% block content %}
+<div class="content-wrapper" style="min-height: 1604.44px;">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        {% include "messages-bootstrap.html" %}
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>{% if '/product-edit/' in request.path %} Edit {% else %} Create {% endif %} Product</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'backoffice:product_list' %}">Product List</a></li>
+              <li class="breadcrumb-item active">{% if '/product-edit/' in request.path %} Edit {% else %} Create {% endif %} Product</li>
+              {% comment %} <a href="{{request.META.HTTP_REFERER}}">Go back</a> {% endcomment %}
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-12 col-lg-12  col-xl-12">
+          <div class="card card-secondary">
+            <div class="card-header">
+              <h3 class="card-title">Product Basic Details</h3>
+
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              {% if form.non_field_errors %}
+                  <div class="alert alert-danger" role="alert">
+                      {% for error in form.non_field_errors %}
+                          <p>{% if forloop.last %} class="mb-0"{% endif %}>{{ error }}</p>
+                      {% endfor %}
+                  </div>
+              {% else %}
+                  {% if error %}
+                      <div class="alert alert-warning alert-danger fade show" role="alert">
+                            <strong>Error!</strong> {{ error }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                      </div>
+                  {% endif %}
+              {% endif %}
+              <form id="post_form" class="price-form" method="POST" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+    
+                <div class="form-group row">
+                    {% for field in form %}
+                        <div class="col-sm-6 mb-2">
+                            {{ field.label_tag }}
+        
+                            {% if form.is_bound %}
+                                {% if field.errors %}
+        
+                                    {% if field.field.widget.input_type == "checkbox" %}
+                                        {% render_field field title=field.name|title  %}
+                                    {% else %}
+                                        {% render_field field title=field.name|title class="form-control is-invalid" %}
+                                    {% endif %}
+                                    {% for error in field.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ error }}
+                                    </div>
+                                    {% endfor %}
+        
+                                {% else %}
+                                    {% if field.field.widget.input_type == "checkbox" %}
+                                        {% render_field field title=field.name|title  %}
+                                    {% else %}
+                                        {% render_field field title=field.name|title  class="form-control is-valid" %}
+                                    {% endif %}
+                                {% endif %}
+                            {% else %}
+                                {% if field.field.widget.input_type == "file" and field.field.label == 'Product Images' %}
+                                    <div class="form-control">
+                                        {{field}}
+                                    </div>
+                                    {% for media_urls in form.instance.product_media.all %}
+                                        {% if media_urls.image %}
+                                            <div class="img-wrap" data-id="{{ media_urls.id }}">
+                                                {% comment %} this is old url of the project {% endcomment %}
+                                                {% comment %} <img class="imageThumb preview-img" src="{{MARKET_URL}}{{media_urls.image.name|slice:"6:"}}" title="{{ form.instance.name }}"> {% endcomment %}
+                                                <img class="imageThumb preview-img" src="{{media_urls.image|verify_url_of_market_or_backoffice}}" title="{{ form.instance.name }}">
+                                                <span class="main_img_rm">X</span>
+                                            </div>
+                                        {%endif%}
+                                    {% endfor %}
+                                {%elif field.field.widget.input_type == "file" and field.field.label == 'Demo Video Link'%}
+                                    <div class="form-control">
+                                        {{field}}
+                                    </div>
+                                    {% for media_urls in form.instance.product_media.all %}
+                                        {% if media_urls.demo_video %}
+                                            <div class="img-wrap-video" data-id="{{ media_urls.id }}">
+                                                <video class="videoThumb preview-img" width="200" height="150" controls>
+                                                    <source src="{{media_urls.demo_video|verify_url_of_market_or_backoffice}}" type="video/mp4">
+                                                    {% comment %} <source src="{{media_urls.demo_video.name|slice:"6:"}}" type="video/mp4"> {% endcomment %}
+                                                </video>
+                                                <span class="main_video_rm">X</span>
+                                            </div>
+                                        {%endif%}
+                                    {% endfor %}
+                                {% elif field.field.widget.input_type == "checkbox" %}
+                                    {% render_field field title=field.name|title  %}
+                                {% else %}
+                                    {% render_field field title=field.name|title class="form-control" %}
+                                {% endif %}
+                            {% endif %}
+        
+                            {% if field.help_text %}
+                            <small class="form-text text-muted">
+                                {{ field.help_text }}
+                            </small>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <div class="row" style="width: 100%;padding: 1.25rem;">
+                      <div class="pack_and_del_frm col-12 col-lg-8">
+
+                      </div>
+                    </div>
+                    {% if '/product-edit/' in request.path %}
+                        <div class="col-sm-12">
+                            <h6 class="mt-3"><b>Product Price(s):</b></h6>
+                            {% for price_form in price_form_list %}
+                                <div class="d-flex dynamic-form-fields" id="initial_field">
+                                     {% for hidden_field in price_form.hidden_fields %}
+                                        {{ hidden_field }}
+                                    {% endfor %}
+                                    {% for field in price_form.visible_fields %}
+                                        <p>
+                                            {{ field.label_tag }}
+                                            {% render_field field title=field.name|title  %}
+                                            {% if field.help_text %}
+                                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                                            {% endif %}
+                                        </p>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% comment %} <div class="col-sm-12">
+                            <div id="dynamicForm" class="dynamic-price-form">
+    
+                            </div>
+                            <label class="mt-3"><b>Add More Price :</b></label>
+                            <a href="javascript:void(0);" class="btn btn-primary btn-sm" id="add-price"><i class="fa fa-plus" aria-hidden="true"></i></a>
+                        </div> {% endcomment %}
+                    {% else %}
+                        <div class="col-sm-12">
+                            {% comment %} <label class="mt-3"><b>Create Price Structure:</b></label> {% endcomment %}
+                            {% comment %} <a href="javascript:void(0);" class="btn btn-primary btn-sm" id="add-price"><i class="fa fa-plus" aria-hidden="true"></i></a> {% endcomment %}
+                            <div class="dynamic-price-form" id="dynamicForm">
+                                <div class="row">
+                                    {% for field in price_form %}
+                                        <div class="col-lg-2 col-6">                        
+                                                {{ field.label_tag }}
+                                            {% if price_form.is_bound %}
+                                                {% if field.errors %}
+    
+                                                    {% render_field field title=field.name|title  class="form-control is-invalid"%}
+                                                    {% for error in field.errors %}
+                                                    <div class="invalid-feedback">
+                                                        {{ error }}
+                                                    </div>
+                                                    {% endfor %}
+    
+                                                {% else %}
+                                                    {% render_field field title=field.name|title  class="form-control is-valid" %}
+                                                {% endif %}
+                                            {% else %}
+                                                {% if field.field.widget.input_type == "checkbox" %}
+                                                    {% render_field field title=field.name|title  class="form-control radio" %}
+                                                {% else %}
+                                                    {% render_field field title=field.name|title  class="form-control" %}
+                                                {% endif %}
+                                            {% endif %}
+    
+                                            {% if field.help_text %}
+                                            <small class="form-text text-muted">
+                                                {{ field.help_text }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if '/product-edit/' in request.path %}
+                    <button type="submit" class="btn btn-primary add-product">Update Product</button>
+                {% else %}
+                    <button type="submit" class="btn btn-primary add-product">Add Product</button>
+                {% endif %}
+            </form>
+            <input type="hidden" id="af_warranty" name="af_warranty" value="{{ af_warranty }}">
+            <input type="hidden" id="af_sales" name="af_sales" value="{{ af_sales }}">
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+      </div>
+    </section>
+    <!-- /.content -->
+  </div>
+{% endblock content %}
+{% block script %}
+  <script src="{% static 'assets/ckeditor.4.4.7/ckeditor.js' %}"></script>
+  <script>
+    CKEDITOR.replace("id_specification");
+    CKEDITOR.replace("id_description");
+  </script>
+
+  <script>  
+    var af_warranty = $('#af_warranty').val();
+    var af_sales = $('#af_sales').val();
+    af_warranty = af_warranty.replace('[','');
+    af_warranty = af_warranty.replace(']','');
+    af_warranty = af_warranty.replace(' ','');
+    af_warranty = af_warranty.replace(/'/g, '');
+
+    af_sales = af_sales.replace('[','');
+    af_sales = af_sales.replace(']','');
+    af_sales = af_sales.replace(' ','');
+    af_sales = af_sales.replace(/'/g, '');
+    $.each(af_warranty.split(","), function(i,e){
+        $("#id_after_warranty_service option[value='" + e.trim() + "']").prop("selected", "true");
+    });
+    $.each(af_sales.split(","), function(i,e){
+        $("#id_after_sales_service_provided option[value='" + e.trim() + "']").prop("selected", "true");
+    });
+    $(document).on('click', '#dynamicForm input[type="checkbox"]', function() {
+        $('#dynamicForm input[type="checkbox"]').not(this).prop('checked', false);
+    });
+
+     var modal = document.getElementById("myModal");
+    $(document).ready(function() {
+        $(document).on('click', '.preview-img', function(){
+            var img = $(this);
+            var modalImg = document.getElementById("img01");
+            var captionText = document.getElementById("caption");
+            modal.style.display = "block";
+            modalImg.src = this.src;
+            captionText.innerHTML = this.alt;
+        });
+    })
+
+
+
+    //var span = document.getElementsByClassName("close")[0];
+
+    //span.onclick = function() {
+    //modal.style.display = "none";
+    //}
+
+    function deleteImg(this_val){
+        var cur_obj = this_val;
+        console.log(cur_obj);
+        var col_name = cur_obj.parent().parent().find('input').attr('name');
+        console.log(col_name);
+
+        if(col_name == 'image'){
+            var col_id = cur_obj.parent().attr('data-id');
+        }
+        else {
+            var col_id = cur_obj.parent().attr('data-id');
+
+        }
+        $.ajax({
+            url: '/delete-image-by-id/',
+            data: {id:col_id, delete_from_model:'product'},
+            success: function (data) {
+                if(data.status){
+                    cur_obj.parent().remove();
+                }
+            },
+            error: function (e) {
+                console.log(e);
+            }
+
+        });
+    };
+
+    $('.main_img_rm').on('click',function(){
+        let text = "Are you sure you want to delete this image?";
+        if (confirm(text) == true) {
+            this_val = $(this);
+            deleteImg(this_val);
+        } else {
+        }
+    })
+
+    $('.main_video_rm').on('click',function(){
+        let text = "Are you sure you want to delete this video?";
+        if (confirm(text) == true) {
+            this_val = $(this);
+            deleteImg(this_val);
+        } else {
+        }
+    })
+
+
+    {% comment %} before working function {% endcomment %}
+    {% comment %} function deleteImg(){
+        var cur_obj = $(this);
+        console.log(cur_obj);
+        var col_name = cur_obj.parent().parent().find('input').attr('name');
+        console.log(col_name);
+
+        if(col_name == 'image'){
+            var col_id = cur_obj.parent().attr('data-id');
+        }
+        else {
+            var col_id = cur_obj.parent().attr('data-id');
+
+        }
+        $.ajax({
+            url: '/delete-image-by-id/',
+            data: {id:col_id, delete_from_model:'product'},
+            success: function (data) {
+                if(data.status){
+                    cur_obj.parent().remove();
+                }
+            },
+            error: function (e) {
+                console.log(e);
+            }
+
+        });
+    };
+
+
+
+    $(document).on('click', '.main_img_rm', deleteImg);
+    $(document).on('click', '.main_video_rm', deleteImg);
+    $( document ).ready(function() {
+        $(document).on('click', '.main_img_rm', function(){
+            return confirm('Are you sure you want to delete this?');
+        });
+
+        $('#id_currency > option').each(function(){
+            $(this).addClass('curreny-cap');
+        });
+    }); {% endcomment %}
+
+</script>
+
+<script>
+    $(window).on('load',function(){
+        $('#id_vendor').empty();
+        $.ajax({
+            url: '{% url "backoffice:get_company_as_vendor" %}',
+            success: function (data) {
+                    $('#id_vendor').append(data.data);
+            },
+            error: function (data) {
+                console.log('no error');
+            }
+
+        });
+
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/additional-methods.min.js"></script>
+<script src="{% static 'veloce-store/product-page.js' %}"></script>
+
+{% endblock script %}

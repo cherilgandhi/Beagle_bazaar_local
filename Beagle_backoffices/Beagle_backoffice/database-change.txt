@@ -1,0 +1,122 @@
+DATABASES = {
+    'default': {},
+    'auth_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'beagle_backoffice_dev_ravi',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'bizcred_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Beagle_bizcred_live',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'veloce1_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Beagle_bazar_live',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'veloce2_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Beagle_fintech_live',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+}
+
+#######################################
+
+DATABASES = {
+    'default': {},
+    'auth_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'beagle_backoffice_dev_ravi',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'bizcred_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'bizcred_innovation_ravi',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'veloce1_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Market_ravi',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'veloce2_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'fintech_ravi',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+}
+
+#######################################
+DATABASES = {
+    'default': {},
+    'auth_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'beagle_backoffice',
+        'USER': 'admin',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'bizcred_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'beagle_bizcred_live',
+        'USER': 'admin',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'veloce1_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'beaglebazzar',
+        'USER': 'admin',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'veloce2_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'beagle_fintech',
+        'USER': 'admin',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+}
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'beagle_backoffice',
+        'USER': 'admin',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}

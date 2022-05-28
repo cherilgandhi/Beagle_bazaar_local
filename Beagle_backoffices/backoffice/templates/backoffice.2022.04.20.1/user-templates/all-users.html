@@ -1,0 +1,218 @@
+{% extends 'base-user.html' %}
+{% load static %}
+{% block title %}Index Page{% endblock title %}
+{% block css %}
+
+
+<!-- DataTables -->
+<link href="{% static 'assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}" rel="stylesheet">
+
+  
+{% endblock css %}
+{% block content %}
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <div class="container-fluid">
+      {% include "messages-bootstrap.html" %}
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Protals Users</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{% url 'backoffice:index' %}">Home</a></li>
+            <li class="breadcrumb-item active">All User</li>
+          </ol>
+        </div>
+      </div>
+    </div><!-- /.container-fluid -->
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa fa-list"></i> All Protals Users List</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <table id="user_details" class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>First name</th>
+                    <th>Last name</th>
+                    <th>E-mail</th>
+                    <th>Market Reg</th>
+                    <th>Fintech Reg</th>
+                    <th>Reg date</th>
+                    <th>Last Login</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if bizcred_users %}
+                  {% for bizcred_user in bizcred_users %}
+                  {% if not bizcred_user.is_superuser %}
+                  <tr>
+                      <td>{% if bizcred_user.first_name %}{{bizcred_user.first_name}}{% else %} - {% endif %}</td>
+                      <td>{% if bizcred_user.first_name %}{{bizcred_user.last_name}}{% else %} - {% endif %}</td>
+                      <td>{{bizcred_user.email}}</td>
+                      
+                      <td>{% if store_users %}{% for store_user in store_users %}{% if store_user.email == bizcred_user.email %}Yes{% endif %}{% endfor %} {% else %}Database Check{% endif %}</td>
+                      <td>{% if fintech_users %}{% for fintech_user in fintech_users %}{% if fintech_user.email == bizcred_user.email %}Yes{% endif %}{% endfor %} {% else %}Database Check{% endif %}</td>
+                      
+                      <td>{{bizcred_user.date_joined|date:"Y/m/d"}}</td>
+                      <td>{% if bizcred_user.last_login %}{{bizcred_user.last_login|date:"Y/m/d"}}{% else %} - {% endif %}</td>
+                      {% comment %} <td><a class="btn btn-outline-info btn-sm btn-xs" href="{% url 'backoffice:single_user_data' bizcred_user.email %}" target="blank">View</a></td> {% endcomment %}
+                    </tr>
+                  {% endif %}  
+                  {% endfor %}
+  
+                  {% else %}
+                  <tr>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>No</td>
+                  </tr>
+                  {% endif %}
+                </tbody>  
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa fa-list"></i> All Protals Users List</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <table id="user_details" class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>First name</th>
+                    <th>Last name</th>
+                    <th>E-mail</th>
+                    <th>Market Reg</th>
+                    <th>Fintech Reg</th>
+                    <th>Reg date</th>
+                    <th>Last Login</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if bizcred_users %}
+                  {% for bizcred_user in bizcred_users %}
+                  {% if not bizcred_user.is_superuser %}
+                  <tr>
+                      <td>{% if bizcred_user.first_name %}{{bizcred_user.first_name}}{% else %} - {% endif %}</td>
+                      <td>{% if bizcred_user.first_name %}{{bizcred_user.last_name}}{% else %} - {% endif %}</td>
+                      <td>{{bizcred_user.email}}</td>
+                      
+                      <td>{% if store_users %}{% for store_user in store_users %}{% if store_user.email == bizcred_user.email %}Yes{% endif %}{% endfor %} {% else %}Database Check{% endif %}</td>
+                      <td>{% if fintech_users %}{% for fintech_user in fintech_users %}{% if fintech_user.email == bizcred_user.email %}Yes{% endif %}{% endfor %} {% else %}Database Check{% endif %}</td>
+                      
+                      <td>{{bizcred_user.date_joined|date:"Y/m/d"}}</td>
+                      <td>{% if bizcred_user.last_login %}{{bizcred_user.last_login|date:"Y/m/d"}}{% else %} - {% endif %}</td>
+                      {% comment %} <td><a class="btn btn-outline-info btn-sm btn-xs" href="{% url 'backoffice:single_user_data' bizcred_user.email %}" target="blank">View</a></td> {% endcomment %}
+                    </tr>
+                  {% endif %}  
+                  {% endfor %}
+  
+                  {% else %}
+                  <tr>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>No</td>
+                  </tr>
+                  {% endif %}
+                </tbody>  
+              </table>
+
+              {% if bizcred_users.has_previous %}
+                <a href="?page={{ bizcred_users.previous_page_number }}">Previous</a>
+                {% else %}
+                  <a>Previous</a>
+                {% endif %}
+
+                {% for i in bizcred_users.paginator.page_range %}
+                  {% if bizcred_users.number == i %}
+                    <a href="#">{{ i }} </a>
+                  {% else %}
+                    <a href="?page={{ i }}">{{ i }}</a>
+                  {% endif %}
+                {% endfor %}
+
+                {% if bizcred_users.has_next %}
+                  <a href="?page={{ bizcred_users.next_page_number }}">Next</a>
+                {% else %}
+                  <a>Next</a>
+                {% endif %}
+
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+    </div>
+    <!-- /.container-fluid -->
+  </section>
+  <!-- /.content -->
+</div>
+
+{% endblock content %}
+{% block script %}
+
+
+<!-- DataTables  & Plugins -->
+<script src="{% static 'assets/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+
+<script>
+  $(function () {
+    $("#user_details").DataTable({
+      "responsive": true, "lengthChange": false, "autoWidth": false,
+      //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#backoffice_active_user_wrapper .col-md-6:eq(0)');
+    $('#example2').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "responsive": true,
+    });
+  });
+</script>
+{% endblock script %}

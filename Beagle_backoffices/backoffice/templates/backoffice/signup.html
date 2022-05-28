@@ -1,0 +1,114 @@
+{% extends 'base-admin.html' %}
+{% load static %}
+{% block title %}Create Users{% endblock title %}
+{% block css %}
+<link href="{% static 'assets/vendors/animate.css/animate.min.css' %}" rel="stylesheet">
+<style>
+   label {
+   font-size: 17px;
+   font-weight: 400;
+   }
+   .asterisk{
+   color: red;
+   font-size: 17px;
+   }
+</style>
+{% endblock css %}
+{% block content %}
+<div class="content-wrapper">
+   <!-- Content Header (Page header) -->
+   <section class="content-header">
+      <div class="container-fluid">
+         {% include "messages-bootstrap.html" %}
+         <div class="row mb-2">
+            <div class="col-sm-6">
+               <h1>Create Users</h1>
+            </div>
+            <div class="col-sm-6">
+               <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="{% url 'backoffice:admin_index' %}">Home</a></li>
+                  <li class="breadcrumb-item active">Create Users</li>
+               </ol>
+            </div>
+         </div>
+      </div>
+      <!-- /.container-fluid -->
+   </section>
+   <!-- Main content -->
+   <section class="content">
+      <div class="container-fluid">
+         <div class="row">
+            <!-- right column -->
+            <div class="col-12">
+               <!-- general form elements disabled -->
+               <div class="card card-success">
+                  <div class="card-body">
+                     <div class="row">
+                        <div class="col-12 col-sm-10 col-md-10 col-lg-10 col-xl-8 my-3">
+                           <form  method="post" action="{% url 'backoffice:signup' %}" novalidate>
+                              {% csrf_token %}            
+                              {% if error %}
+                              <br>
+                              <div class="alert alert-danger" role="alert">
+                                 {{error}}
+                              </div>
+                              {% elif success %}
+                              <br>
+                              <div class="alert alert-success" role="alert">
+                                 {{success}}
+                              </div>
+                              {%endif%}
+                              <div class="form-row">
+                                 {% include "backoffice/layouts/form.html" %}
+                              </div>
+                              <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                           </form>
+                        </div>
+                     </div>
+                  </div>
+                  <!-- /.card-body -->
+               </div>
+               <!-- /.card -->
+            </div>
+            <!--/.col (right) -->
+         </div>
+         <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+   </section>
+   <!-- /.content -->
+</div>
+{% endblock content %}
+{% block script %}
+<script>
+   $(document).ready(function(){
+   
+     $( "#id_email" ).on('keyup',function(){
+       var email  = $(this).val();
+       $.ajax({
+         url:"{% url 'backoffice:signup' %}",
+         method:'get',
+         data : {'email':email},
+         success : function(data){
+           if(data.data == 'true'){
+             console.log(data,'if');
+             text = '<span class="text-danger" >this email is already taken</span>';
+             $('.feedback_id_email').html(text)
+           }else{
+             console.log(data,'else');
+             text = '<span class="text-success" >this email is availabel you can Proceed .. </span>';
+             $('.feedback_id_email').html(text)
+           }
+         
+         },
+         error : function(data){
+          
+         },
+       })
+       
+     });
+   
+   });
+   
+</script>
+{% endblock script %}

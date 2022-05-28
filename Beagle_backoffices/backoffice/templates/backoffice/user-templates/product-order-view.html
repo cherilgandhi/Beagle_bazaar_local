@@ -1,0 +1,229 @@
+{% extends 'base-user.html' %}
+{% load static %}
+{% load auth_tag %}
+{% block title %}Inquiry List{% endblock title %}
+{% block css %}
+
+<!-- DataTables -->
+<link href="{% static 'assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}" rel="stylesheet">
+
+  <!-- Select2 -->
+<link rel="stylesheet" href="{% static 'assets/plugins/select2/css/select2.min.css' %}">
+<style>
+    .select2-container--default .select2-selection--multiple .select2-selection__choice, 
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove{
+        color:white;
+        background-color: #3d9970;
+        border-color: #3d9970;   
+    }
+
+    .select2-container .select2-selection--single{
+        min-height:38px;
+    }
+
+</style>
+{% endblock css %}
+{% block content %}
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            {% include "messages-bootstrap.html" %}
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Orders Lists</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'backoffice:index' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'backoffice:all_orders' %}"> All Orders</a></li>
+                        <li class="breadcrumb-item active">Orders Preview</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- .container-fluid -->
+        <div class="container-fluid">
+            {% if order_products %}
+            <!-- .row -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <!-- .card-header -->
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa fa-list"></i> Total Orders</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-md-6 my-2 border-left px-3 border-success">
+                                    <h4>Orders Details</h4>
+                                    <b>Orders Id :</b> #{{order_details.order_id}},<br> 
+                                    <b>Order Process Status :</b> {% if order_details.order_status == 0 %}Pending{% endif %},<br> 
+                                    <!-- <b>Payment Method :</b> {{order_details.payment_method}},<br>  -->
+                                    <b>Transaction id :</b> {{order_details.transaction_id}},<br> 
+                                    <b>Total Amount :</b> {{order_details.total_transaction_amount}},<br> 
+                                    <b>Date :</b> {{order_details.created_at}}
+                                </div>
+                                <div class="col-12 col-md-6 my-2 border-left px-3 border-success">
+                                    <h4>Orders Address</h4>
+                                    <b>Full Name :</b> {{order_address.firstname}} {{order_address.lastname}},<br>
+                                    <b>Company Name :</b> {{order_address.company_name}},<br>
+                                    <b>Address :</b> {{order_address.street_address}},<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{order_address.city|title}}, {{order_address.state|title}},<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{order_address.pin_code}}<br>
+                                    <b>Contact : </b> {{order_address.phone_number}}<br>
+                                </div>
+                            </div>
+                            <hr>
+                            <table id="user_details" class="table table-bordered table-striped">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Image</th>
+                                        <th>Product Name</th>
+                                        <th>Price</th>
+                                        <th>disc</th>
+                                        <th>taxes</th>
+                                        <th>Product Final Amt X  Qty</th>
+                                        <th>Final Amt</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order_product in order_products %}
+                                    <tr>
+                                        <td><b>{{forloop.counter}}</b></td>
+                                        <td class="product-thumbnail">
+                                            <a href="#"><img src="{{order_product.product_images|verify_url_of_market_or_backoffice}}" alt="" style="height:70px;width:70px;"/></a>    
+                                        </td>
+                                        <td><b>{{order_product.product_name}}</b></td>
+                                        <td><b class="text-success"> ₹ {{order_product.product_amount}}</b></td>
+                                        <td><b class="text-danger">- ₹ {{order_product.discount_amount}}</b></td>
+                                        <td><b class="text-success">+ ₹{{order_product.product_taxes}}</b></td>
+                                        <td><b>₹ {{order_product.product_final_amount}}</b> <b> X </b> <b>{{order_product.quantity}}</b></td>
+                                        <td><b>₹ {{order_product.product_final_amount|calculate_product_amount_plus_qty:order_product.quantity}}</b></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            {% else %}
+                <h3 class="text-center">Records Not Found</h3>
+            {% endif %}
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+
+</div>
+{% endblock content %}
+{% block script %}
+
+<!-- DataTables  & Plugins -->
+<script src="{% static 'assets/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+
+<!-- Select2 -->
+<script src="{% static 'assets/plugins/select2/js/select2.full.min.js' %}"></script>
+
+<script>
+    $(function () {
+      $('.select2').select2()
+    });
+</script>
+
+
+<script>
+  $(function () {
+    $("#user_details").DataTable({
+      "responsive": true, "lengthChange": false, "autoWidth": false,"paging": false,"searching": false, "info": false
+      //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#backoffice_active_user_wrapper .col-md-6:eq(0)');
+    
+  });
+</script>
+
+<script>
+
+    //.GetCategory
+    $('#category-field-id').on("select change", function() {
+        cat_id = $('.GetCategory:selected').val();
+        //console.log(cat_id);
+        $('#sub-category-field-id').empty();
+        $.ajax({
+            url: "{% url 'backoffice:ajax_category' %}",
+            type :'get',
+            data:{'cat_id':cat_id},
+            success: function(data){
+                console.log(data.sub_category);
+                $('#sub-category-field-id').append(data.sub_category);
+            },
+            error: function(data){
+                console.log(data);
+            },
+        })  
+    });
+
+    $("#sub-category-field-id").on("select2:select select2:unselect", function (e) {
+        var items = $(this).val();       
+        //console.log(items);
+        //console.log($.type(items));
+        $('#company-field-id').empty();
+        $.ajax({
+            url: "{% url 'backoffice:ajax_subcategory' %}",
+            type :'get',
+            data:{'sub_cat_id':items},
+            success: function(data){
+                $('#company-field-id').append(data.all_company);
+            },
+            error: function(data){
+            },
+        });
+    
+    });
+
+    $('#company-field-id').on("select change", function() {
+        company_email = $(this).val();
+        var sub_category = $('#sub-category-field-id').val();
+        console.log(company_email,sub_category);
+        $('#product-field-id').empty();
+        $.ajax({
+            url: "{% url 'backoffice:ajax_company' %}",
+            type :'get',
+            data:{'company_email':company_email,'sub_category':sub_category},
+            success: function(data){
+                //console.log(data.all_product);
+                $('#product-field-id').append(data.all_product);
+            },
+            error: function(data){
+                console.log(data);
+            },
+        })  
+    });
+
+    
+</script>
+
+{% endblock script %}

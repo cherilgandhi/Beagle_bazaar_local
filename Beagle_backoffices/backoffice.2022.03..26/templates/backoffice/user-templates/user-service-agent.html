@@ -1,0 +1,182 @@
+{% extends 'base-user.html' %}
+{% load static %}
+{% block title %}Service-Agent List{% endblock title %}
+{% block css %}
+
+
+<!-- DataTables -->
+<link href="{% static 'assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}" rel="stylesheet">
+<link href="{% static 'assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}" rel="stylesheet">
+
+  
+{% endblock css %}
+{% block content %}
+
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <div class="container-fluid">
+      {% include "messages-bootstrap.html" %}
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Service-Agents</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{% url 'backoffice:index' %}">Home</a></li>
+            <li class="breadcrumb-item active">Service-Agents</li>
+          </ol>
+        </div>
+      </div>
+    </div><!-- /.container-fluid -->
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          {% if service_agents %}
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa fa-list"></i> List of Service-Agents</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <div class="text-left my-2">
+                <a class="btn btn-info disabled my-1 mx-1">
+                  <i class="fa fa-edit"></i> Total Profile ({{total_count}})
+                </a>
+                <a href="{% url 'backoffice:user_pending_profile' 'service_agent' %}?account=6" class="btn btn-success my-1 mx-1" target="_blank">
+                  <i class="fa fa-edit"></i> Approve Profile ({{pending_count}})
+                </a>
+              </div>
+                <table id="user_details" class="table table-bordered table-striped">
+                  <thead>
+                    <tr>
+                      <th>Full Name</th>
+                      <th>E-mail</th>
+                      <th>Address</th>
+                      <th>Contact</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                      {% for user_list in service_agents %}
+                      <tr>
+                        <td>{{user_list.auth_user.first_name|title}} {{user_list.auth_user.last_name|title}}</td>
+                        <td>{{user_list.auth_user.email}}</td>
+                        <td>
+                          {% if user_list.address.unit_number %}
+                            {{user_list.address.unit_number}},
+                          {% endif %}<br>
+                          {% if user_list.address.street_address %}
+                            {{user_list.address.street_address}},
+                          {% endif %}<br>
+                          {% if user_list.address.city %}
+                            {{user_list.address.city|title}},
+                          {% endif %}
+                          {% if user_list.address.state|title %}
+                            {{user_list.address.state|title}},
+                          {% endif %} 
+                          {{user_list.address.pin_code}}</td>
+                        <td>{{user_list.phone_number.phone_number}}</td>
+                      </tr>
+                      {% endfor service_agents %}
+                  </tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer py-2 px-3">
+              <div class="col-md-12">    
+                  <div class="row">
+                      <div class="col-lg-4 col-xl-3 my-2 py-0">
+                          <p class="my-0 py-0 align-middle">Showing {{service_agents.start_index}}-{{service_agents.end_index}} of {{ service_agents.paginator.count }} results</p>
+                      </div>
+                      <div class="col-lg-8 col-xl-9 my-2 py-0">   
+                        {% if service_agents.has_other_pages %}
+                        <nav aria-label="Page navigation example">
+                          <ul class="pagination justify-content-end my-0">
+                              {% if service_agents.has_previous %}
+                                  <li class="page-item"><a class="page-link" href="?page={{ service_agents.previous_page_number }}" tabindex="-1" aria-disabled="true">&laquo; Prev</a></li>
+                              {% else %}
+                                  <li class="page-item disabled"><a class="page-link disabled" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Prev</a></li>
+                              {% endif %}
+
+                              {% for i in service_agents.paginator.page_range %}
+                                  {% if  i == service_agents.number %}
+                                  <li class="page-item active"><span class="page-link">{{ i }}<span class="sr-only">(current)</span></span></li>
+
+                                  {% else %}
+                                      {% if i == 0 %}
+                                          <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                      {% else %}
+                                          {% if i|add:"-5" <= service_agents.number and service_agents.number <= i|add:"5" %}
+                                              <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                          {% elif i|divisibleby:"10" or i == service_agents.paginator.num_pages %}
+                                              <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                          {% endif %}
+                                      {% endif %}
+                                  {% endif %}
+                              {% endfor %}
+
+                              {% if service_agents.has_next %}
+                                  <li class="page-item"><a class="page-link" href="?page={{ service_agents.next_page_number }}" > Next &raquo;</a></li>
+                              {% else %}
+                                  <li class="page-item disabled"><a class="page-link">Next</a></li>
+                              {% endif %}
+                          </ul>
+                        </nav>
+                        {% endif %}
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+          {% else %}
+            <h3 class="text-center">Records Not Found</h3>
+          {% endif %}
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+    </div>
+    <!-- /.container-fluid -->
+  </section>
+  <!-- /.content -->
+</div>
+{% endblock content %}
+{% block script %}
+
+<!-- DataTables  & Plugins -->
+<script src="{% static 'assets/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'assets/plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+
+<script>
+  $(function () {
+    $("#user_details").DataTable({
+      "responsive": true, "lengthChange": false, "autoWidth": false,"paging": false,"searching": false, "info": false
+      //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#backoffice_active_user_wrapper .col-md-6:eq(0)');
+    $('#example2').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "responsive": true,
+    });
+  });
+</script>
+{% endblock script %}

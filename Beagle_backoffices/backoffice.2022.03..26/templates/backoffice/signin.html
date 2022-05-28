@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>Beagle Backoffice Login</title>
+      <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="{% static 'assets/BackOfficeLogin/css/materialdesignicons.min.css' %}">
+      <link rel="stylesheet" href="{% static 'assets/BackOfficeLogin/css/bootstrap.min.css' %}">
+      <link rel="stylesheet" href="{% static 'assets/BackOfficeLogin/css/login.css' %}">
+      <link rel="shortcut icon" href="{% static 'assets/dist/img/B2.png' %}" type="image/x-png">
+      <style>
+         <!-- .invalid-feedback {
+            background-color: orange;
+            color:red;
+            } -->
+         label {
+         font-size: 17px;
+         font-weight: 400;
+         }
+         .asterisk{
+         color: red;
+         font-size: 17px;
+         }
+      </style>
+   </head>
+   <body>
+      {% for message in messages %}
+      <div class="alert {{ message.tags }} alert-dismissible shadow fade show" role="alert">
+         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+         <span aria-hidden="true">&times;</span>
+         </button>
+         {{ message | safe }}
+      </div>
+      {% endfor %}
+      <main class="d-flex align-items-center min-vh-100 py-3 py-md-0">
+         <div class="container">
+            <div class="card login-card">
+               <div class="row no-gutters">
+                  <div class="col-md-5" style="background-color: #ff5b5b !important;">
+                     <img src="{% static 'assets/BackOfficeLogin/images/grow.png' %}" style="height: 83%; top:8%"alt="login" class="login-card-img">
+                  </div>
+                  <div class="col-md-7">
+                     <div class="card-body">
+                        <div class="brand-wrapper">
+                           <img src="{% static 'assets/BackOfficeLogin/images/bazarlogo.png' %}" alt="logo" height="80px">
+                        </div>
+                        <p class="login-card-description"></p>
+                        <form method="post" action="" novalidate>
+                           {% csrf_token %}
+                           {% if error %}
+                           <br>
+                           {% elif success %}
+                           <br>
+                           <div class="alert alert-success" role="alert">
+                              {{success}}
+                           </div>
+                           {%endif%}
+                           <div class="form-row">
+                              {% include "backoffice/layouts/without-field-form.html" %}
+                              <div class="form-group col-md-12">
+                                 <input type="checkbox" onclick="myFunction()"> Show Password
+                              </div>
+                           </div>
+                           <input name="login" id="login" class="btn btn-block login-btn mb-4" type="submit" value="Login" style="background-color: #ff5b5b !important; ">
+                        </form>
+                        <footer class="main-footer">
+                           <strong>Copyright &copy; 2020-2022 <a href="http://www.kirtii.com" target="_blank" style="color:#f55b5b;">Kirti Healthcare Pvt. Ltd.</a></strong><br>All rights reserved.
+                        </footer>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </main>
+      <script src="{% static 'assets/BackOfficeLogin/js/jquery-3.4.1.min.js' %}"></script>
+      <script src="{% static 'assets/BackOfficeLogin/js/popper.min.js' %}"></script>
+      <script src="{% static 'assets/BackOfficeLogin/js/bootstrap.min.js' %}"></script>
+      <script>
+         function myFunction() {
+           var x = document.getElementById("id_password");
+           if (x.type === "password") {
+             x.type = "text";
+           } else {
+             x.type = "password";
+           }
+         }
+         
+      </script>
+   </body>
+</html>

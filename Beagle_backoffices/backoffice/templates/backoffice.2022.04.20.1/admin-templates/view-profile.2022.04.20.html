@@ -1,0 +1,488 @@
+{% extends 'base-admin.html' %}
+{% load auth_tag %}
+{% load static %}
+{% block title %}View User Detail{% endblock title %}
+{% block css %}
+<!-- SweetAlert2 -->
+<link rel="stylesheet" href="{% static 'assets/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css' %}">
+<!-- Toastr -->
+<link rel="stylesheet" href="{% static 'assets/plugins/toastr/toastr.min.css' %}">
+{% endblock css %}
+{% block content %}
+{% csrf_token %}
+<div class="content-wrapper">
+	<!-- Content Header (Page header) -->
+	<section class="content-header">
+		<div class="container-fluid">
+			{% include "messages-bootstrap.html" %}
+			<div class="row mb-2">
+				<div class="col-sm-6">
+					<h1>User Profiles with permissions</h1>
+				</div>
+				<div class="col-sm-6">
+					<ol class="breadcrumb float-sm-right">
+						<li class="breadcrumb-item"><a href="{% url 'backoffice:admin_index' %}">Home</a></li>
+						<li class="breadcrumb-item"><a href="{% url 'backoffice:backoffice_users' %}">User List</a></li>
+						<li class="breadcrumb-item active">User Detail</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+		<!-- /.container-fluid -->
+	</section>
+	<!-- Main content -->
+	<section class="content">
+		<div class="container-fluid h-100">
+			<div class="row">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-header">
+							<h3 class="card-title"><i class="fa fa-list"></i> Profiles and Permissions</h3>
+						</div>
+						<!-- /.card-header -->
+						<div class="card-body">
+							<div class="row">
+								<div class="col-12 col-xl-3">
+									<div class="card card-secondary" >
+										<div class="card-header">
+											<h3 class="card-title">
+												User's Personal Detail
+											</h3>
+										</div>
+										<div class="card-body">
+											{% if user_profiles %}
+											{% for user_profile in user_profiles %}
+											<strong><i class="fas fa-user"></i> NAME</strong>
+											<p class="text-muted" >
+												{{user_profile.first_name}} {{user_profile.last_name}} 
+											</p>
+											<hr>
+											<strong><i class="fas fa-envelope"></i> EMAIL</strong>
+											<p class="text-muted">
+												{{user_profile.email}}
+											</p>
+											<hr>
+											<strong><i class="fas fa-address-book"></i> ADDRESS</strong>
+											<p class="text-muted">
+												{{user_profile.profile.unit_number}} <br>
+												{{user_profile.profile.street_address}}
+											</p>
+											<hr>
+											<strong><i class="fas fa-phone-alt"></i> CONTACT NO.</strong>
+											<p class="text-muted">
+												{{user_profile.profile.tel_number}} 
+											</p>
+											<hr>
+											<strong><i class="fas fa-users"></i> POSITION IN COMPANY</strong>
+											<p class="text-muted">
+												{{user_profile.profile.user_position}} 
+											</p>
+											<hr>
+											<strong><i class="fas fa-users"></i> ROLE</strong>
+											<p class="text-muted">
+												{{user_profile.usercredentials.user_type|account_tyes_enums_filter}} 
+											</p>
+											<hr>
+											<strong><i class="fas fa-registered"></i> REGISTER DATE</strong>
+											<p class="text-muted">
+												{{user_profile.date_joined|date:"Y/m/d"}} 
+											</p>
+											<hr>
+											<p class="text-muted">
+												{% if user_profile.is_active %}
+												<a class="btn disabled btn-outline-success btn-sm my-2 mx-2 btn-inblock"><b>ACTIVATE</b></a>
+												{% else %}
+												<a class="btn disabled btn-outline-danger btn-sm my-2 mx-2 btn-inblock"><b>DEACTIVATE</b></a>
+												{% endif %}
+												<a href="{% url 'backoffice:edit_profile' user_profile.pk %}" class="btn btn-outline-primary btn-sm my-2 mx-2 btn-inblock"><b>EDIT PROFILE</b></a>
+											</p>
+											<hr>
+											{% endfor user_profiles %}
+											{% endif %}
+										</div>
+									</div>
+								</div>
+								<div class="col-12 col-xl-9">
+									<div class="card card-secondary">
+										<div class="card-header">
+											<h3 class="card-title">Permissions (pening)</h3>
+											<div class="card-tools">
+												<button type="button" class="btn btn-tool" data-card-widget="collapse">
+												<i class="fas fa-minus"></i>
+												</button>
+											</div>
+											<!-- /.card-tools -->
+										</div>
+										<div class="card-body">
+											<div class="row">
+												<div class="col-md-12">
+
+
+													<!-- product related card -->
+													<div class="card card-light collapsed-card">
+														<div class="card-header">
+															<h3 class="card-title">Product Related</h3>
+															<div class="card-tools">
+																{% comment %} <button type="button" class="btn btn-tool" data-card-widget="card-refresh" data-source="widgets.html" data-source-selector="#card-refresh-content" data-load-on-init="false">
+																<i class="fas fa-sync-alt"></i>
+																</button> {% endcomment %}
+																<button type="button" class="btn btn-tool" data-card-widget="collapse">
+																<i class="fas fa-plus"></i>
+																</button>
+																<button type="button" class="btn btn-tool" data-card-widget="maximize">
+																<i class="fas fa-expand"></i>
+																</button>
+																{% comment %} <button type="button" class="btn btn-tool" data-card-widget="remove">
+																<i class="fas fa-times"></i>
+																</button> {% endcomment %}
+															</div>
+															<!-- /.card-tools -->
+														</div>
+														<!-- /.card-header -->
+														<div class="card-body" style="display:block;">
+															<div class="row">
+																<div class="col-12">
+																	<div class="form-group clearfix">
+																		<div class="icheck-success d-inline">
+																			<input class="toastrDefaultSuccess" type="checkbox" {% if permission_dict.product_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.product_view.name}}');" id="{{permission_dict.product_view.name}}">
+																			<label for="{{permission_dict.product_view.name}}">Product View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.product_create.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.product_create.name}}');" id="{{permission_dict.product_create.name}}">
+																			<label for="{{permission_dict.product_create.name}}">Product Create</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.product_delete.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.product_delete.name}}');" id="{{permission_dict.product_delete.name}}">
+																			<label for="{{permission_dict.product_delete.name}}">Product Delete</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.product_update.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.product_update.name}}');" id="{{permission_dict.product_update.name}}">
+																			<label for="{{permission_dict.product_update.name}}">Product Update</label>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<!-- /.card-body -->
+													</div>
+													<!-- end product related card -->
+
+
+													<!-- category card -->
+													<div class="card card-light collapsed-card">
+														<div class="card-header">
+															<h3 class="card-title">category related</h3>
+															<div class="card-tools">
+																<button type="button" class="btn btn-tool" data-card-widget="collapse">
+																<i class="fas fa-plus"></i>
+																</button>
+																<button type="button" class="btn btn-tool" data-card-widget="maximize">
+																<i class="fas fa-expand"></i>
+																</button>
+															</div>
+															<!-- /.card-tools -->
+														</div>
+														<!-- /.card-header -->
+														<div class="card-body">
+															<div class="row">
+																<div class="col-12">
+																	<div class="form-group clearfix">
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.category_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.category_view.name}}');" id="{{permission_dict.category_view.name}}">
+																			<label for="{{permission_dict.category_view.name}}">Category View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.category_create.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.category_create.name}}');" id="{{permission_dict.category_create.name}}">
+																			<label for="{{permission_dict.category_create.name}}">Category Create</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.category_delete.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.category_delete.name}}');" id="{{permission_dict.category_delete.name}}">
+																			<label for="{{permission_dict.category_delete.name}}">Category Delete</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.category_update.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.category_update.name}}');" id="{{permission_dict.category_update.name}}">
+																			<label for="{{permission_dict.category_update.name}}">Category Update</label>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<!-- /.card-body -->
+													</div>
+													<!-- end category card -->
+
+													<!-- sub category card -->
+													<div class="card card-light collapsed-card">
+														<div class="card-header">
+															<h3 class="card-title">Sub category related</h3>
+															<div class="card-tools">
+																<button type="button" class="btn btn-tool" data-card-widget="collapse">
+																<i class="fas fa-plus"></i>
+																</button>
+																<button type="button" class="btn btn-tool" data-card-widget="maximize">
+																<i class="fas fa-expand"></i>
+																</button>
+															</div>
+															<!-- /.card-tools -->
+														</div>
+														<!-- /.card-header -->
+														<div class="card-body">
+															<div class="row">
+																<div class="col-12">
+																	<div class="form-group clearfix">
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.subcategory_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.subcategory_view.name}}');" id="{{permission_dict.subcategory_view.name}}">
+																			<label for="{{permission_dict.subcategory_view.name}}">Sub Category View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.subcategory_create.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.subcategory_create.name}}');" id="{{permission_dict.subcategory_create.name}}">
+																			<label for="{{permission_dict.subcategory_create.name}}">Sub Category Create</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.subcategory_delete.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.subcategory_delete.name}}');" id="{{permission_dict.subcategory_delete.name}}">
+																			<label for="{{permission_dict.subcategory_delete.name}}">Sub Category Delete</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.subcategory_update.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.subcategory_update.name}}');" id="{{permission_dict.subcategory_update.name}}">
+																			<label for="{{permission_dict.subcategory_update.name}}">Sub Category Update</label>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<!-- /.card-body -->
+													</div>
+													<!-- end sub category card -->
+
+
+													<!--order related card -->
+													<div class="card card-light collapsed-card">
+														<div class="card-header">
+															<h3 class="card-title">order related</h3>
+															<div class="card-tools">
+																<button type="button" class="btn btn-tool" data-card-widget="collapse">
+																<i class="fas fa-plus"></i>
+																</button>
+																<button type="button" class="btn btn-tool" data-card-widget="maximize">
+																<i class="fas fa-expand"></i>
+																</button>
+															</div>
+															<!-- /.card-tools -->
+														</div>
+														<!-- /.card-header -->
+														<div class="card-body">
+															<div class="row">
+																<div class="col-12">
+																	<div class="form-group clearfix">
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.order_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.order_view.name}}');" id="{{permission_dict.order_view.name}}">
+																			<label for="{{permission_dict.order_view.name}}">Order View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.order_update.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.order_update.name}}');" id="{{permission_dict.order_update.name}}">
+																			<label for="{{permission_dict.order_update.name}}">Order Update</label>
+																		</div>	
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.order_delete.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.order_delete.name}}');" id="{{permission_dict.order_delete.name}}">
+																			<label for="{{permission_dict.order_delete.name}}"> Order Delete</label>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<!-- /.card-body -->
+													</div>
+													<!-- end order related card -->
+
+													<!--protal users(networks) related card -->
+													<div class="card card-light collapsed-card">
+														<div class="card-header">
+															<h3 class="card-title">Protal Users View</h3>
+															<div class="card-tools">
+																<button type="button" class="btn btn-tool" data-card-widget="collapse">
+																<i class="fas fa-plus"></i>
+																</button>
+																<button type="button" class="btn btn-tool" data-card-widget="maximize">
+																<i class="fas fa-expand"></i>
+																</button>
+															</div>
+															<!-- /.card-tools -->
+														</div>
+														<!-- /.card-header -->
+														<div class="card-body">
+															<div class="row">
+																<div class="col-12">
+																	<div class="form-group clearfix">
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.customer_profile_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.customer_profile_view.name}}');" id="{{permission_dict.customer_profile_view.name}}">
+																			<label for="{{permission_dict.customer_profile_view.name}}"> Customer Profile View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.company_profile_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.company_profile_view.name}}');" id="{{permission_dict.company_profile_view.name}}">
+																			<label for="{{permission_dict.company_profile_view.name}}">Company Profile View</label>
+																		</div>	
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.distributors_profile_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.distributors_profile_view.name}}');" id="{{permission_dict.distributors_profile_view.name}}">
+																			<label for="{{permission_dict.distributors_profile_view.name}}"> Distributors Profile View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.serviceagent_profile_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.serviceagent_profile_view.name}}');" id="{{permission_dict.serviceagent_profile_view.name}}">
+																			 <label for="{{permission_dict.serviceagent_profile_view.name}}"> Serviceagent Profile View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.lender_profile_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.lender_profile_view.name}}');" id="{{permission_dict.lender_profile_view.name}}">
+																			<label for="{{permission_dict.lender_profile_view.name}}">Lender Profile View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.dealer_profile_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.dealer_profile_view.name}}');" id="{{permission_dict.dealer_profile_view.name}}">
+																			<label for="{{permission_dict.dealer_profile_view.name}}">Dealer Profile View</label>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<!-- /.card-body -->
+													</div>
+													<!-- end protal users(networks) related card -->
+                                                    
+													<!--protal users(networks) permissions related card -->
+													<div class="card card-light collapsed-card">
+														<div class="card-header">
+															<h3 class="card-title"> Approved Profile Permissions </h3>
+															<div class="card-tools">
+																<button type="button" class="btn btn-tool" data-card-widget="collapse">
+																<i class="fas fa-plus"></i>
+																</button>
+																<button type="button" class="btn btn-tool" data-card-widget="maximize">
+																<i class="fas fa-expand"></i>
+																</button>
+															</div>
+															<!-- /.card-tools -->
+														</div>
+														<!-- /.card-header -->
+														<div class="card-body">
+															<div class="row">
+																<div class="col-12">
+																	<div class="form-group clearfix">
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.customer_profile_approve_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.customer_profile_approve_view.name}}');" id="{{permission_dict.customer_profile_approve_view.name}}">
+																			<label for="{{permission_dict.customer_profile_approve_view.name}}">Customer Profile Approve View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.company_profile_approve_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.company_profile_approve_view.name}}');" id="{{permission_dict.company_profile_approve_view.name}}">
+																			<label for="{{permission_dict.company_profile_approve_view.name}}">Company Profile Approve View</label>
+																		</div>	
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.distributors_profile_approve_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.distributors_profile_approve_view.name}}');" id="{{permission_dict.distributors_profile_approve_view.name}}">
+																			<label for="{{permission_dict.distributors_profile_approve_view.name}}">Distributors Profile Approve View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.dealer_profile_approve_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.dealer_profile_approve_view.name}}');" id="{{permission_dict.dealer_profile_approve_view.name}}">
+																			 <label for="{{permission_dict.dealer_profile_approve_view.name}}"> Dealer profile Approve View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.serviceagent_profile_approve_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.serviceagent_profile_approve_view.name}}');" id="{{permission_dict.serviceagent_profile_approve_view.name}}">
+																			<label for="{{permission_dict.serviceagent_profile_approve_view.name}}">Serviceagent Profile Approve View</label>
+																		</div>
+																		<hr>
+																		<div class="icheck-success d-inline">
+																			<input type="checkbox" {% if permission_dict.lender_profile_approve_view.value == True %}checked{% endif %} onclick ="AddOrDeletePermissions('{{single_users.id}}','{{permission_dict.lender_profile_approve_view.name}}');" id="{{permission_dict.lender_profile_approve_view.name}}">
+																			<label for="{{permission_dict.lender_profile_approve_view.name}}">Lender Profile Approve View</label>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<!-- /.card-body -->
+													</div>
+													<!-- end protal users(networks) permissions related card -->
+
+
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- /.card-body -->
+					</div>
+					<!-- /.card -->
+				</div>
+				<!-- /.col -->
+			</div>
+			<!-- /.row -->
+		</div>
+		<!-- /.container-fluid -->
+	</section>
+	<!-- /.content -->
+</div>
+{% endblock content %}
+{% block script %}
+<!-- SweetAlert2 -->
+<script src="{% static 'assets/plugins/sweetalert2/sweetalert2.min.js' %}"></script>
+<!-- Toastr -->
+<script src="{% static 'assets/plugins/toastr/toastr.min.js' %}"></script>
+
+<script>
+	function AddOrDeletePermissions(user_id,field_id)
+	{
+		var checkbox_value =  $("#"+field_id).is(":checked");
+		var token = $("input[name=csrfmiddlewaretoken]").val();
+		if (checkbox_value === true){
+			console.log(user_id,field_id,checkbox_value);
+			$.ajax({
+				url: "{% url 'backoffice:ajax_user_permission' %}",
+				type :'post',
+				data:{'user_id':user_id,'field_name':field_id,'checkbox_value':checkbox_value,'csrfmiddlewaretoken': token},
+				success: function (data) {
+					toastr.success(data.messages);
+				},
+				error: function (data) {
+					toastr.error(data.messages);
+				}
+
+        	});
+
+		}else{
+			console.log(user_id,field_id,checkbox_value);
+			$.ajax({
+				url: "{% url 'backoffice:ajax_user_permission' %}",
+				type :'post',
+				data:{'user_id':user_id,'field_name':field_id,'checkbox_value':checkbox_value,'csrfmiddlewaretoken': token},
+				success: function (data) {
+					toastr.success(data.messages);
+				},
+				error: function (data) {
+					toastr.error(data.messages);
+				}
+
+        	});
+			
+		}
+
+
+	};
+	
+</script>
+{% endblock script %}

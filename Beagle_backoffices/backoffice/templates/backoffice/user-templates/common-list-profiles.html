@@ -1,0 +1,78 @@
+{% extends 'base-user.html' %}
+{% load static %}
+{% block title %}Admin Profile{% endblock title %}
+{% block css %}
+<style>
+    .content {
+        padding: 25px;
+    }
+
+    .inside_h1 h1 {
+        margin-bottom: 0;
+        margin-top: 25px;
+        font-size:27px;
+    }
+</style>
+
+{% endblock css %}
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        {% include "messages-bootstrap.html" %}
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            {% comment %} <h1>Profile Approve</h1> {% endcomment %}
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{% url 'backoffice:index' %}">Home</a></li>
+              <li class="breadcrumb-item active">Profile Approve</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+  
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+              <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title"><i class="fa fa-list"></i>&nbsp; Admin site profile Approve</h3>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body">
+                    {% comment %} <h1 class="mt-5 text-secondary">Admin site profile Approve</h1><br><hr> {% endcomment %}
+                    {% if filter_account %}
+                    {%for meta in metas%}
+                        {% if filter_account == meta.account_type %}
+                            <div class="mt-4 inside_h1">
+                                <a href="{% url 'backoffice:view-profile' meta.user.pk %}" >
+                                    <h1 class="text-primary">{{meta.user.first_name|title}} {{meta.user.last_name|title }}</h1>
+                                </a>
+                                <b class="text-dark">Email:</b> {{meta.user.email}} <br>
+                                <b class="text-dark">Account Type:</b> {% for key,value in account_types.items %}{% if  key == meta.account_type %}{{value}}{% endif %}{% endfor account_types %}
+                            </div><hr>
+                        {% endif %}
+                
+                    {%endfor%}
+                    {% else %}
+                            <h2>Invalid credentials</h2>
+                    {% endif %}
+                  </div>
+              </div>
+          </div>
+          <!-- /.col -->
+        </div>
+      </div>
+      <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+{% endblock content %}
+{% block script %}{% endblock script %}

@@ -1,0 +1,100 @@
+{% extends 'base-user.html' %}
+{% load static %}
+{% load auth_tag %}
+{% block title %}Home Page  {% endblock title %}
+{% block css %}{% endblock css %}
+{% block content %}
+<div class="content-wrapper">
+   <!-- Content Header (Page header) -->
+   <div class="content-header">
+      <div class="container-fluid">
+         {% include "messages-bootstrap.html" %}
+         <div class="row mb-2">
+            <div class="col-sm-6">
+               <h1 class="m-0">Dashboard</h1>
+            </div>
+            <!-- /.col -->
+         </div>
+         <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+   </div>
+   <!-- /.content-header -->
+   <!-- Main content -->
+   <section class="content">
+      <div class="container-fluid">
+         <h5 class="mb-2">Total Roles Users</h5>
+         <div class="row">
+            {% if all_account_counts_dicts %}
+            {% for all_account_counts_dict in all_account_counts_dicts %}
+            {% for key, value in all_account_counts_dict.items %}
+            <div class="col-lg-2 col-6">
+               <!-- small box -->
+               <div class="small-box bg-success">
+                  <div class="inner">
+                     <h3>{{value}}</h3>
+                     <p>{{key|title}}</p>
+                  </div>
+                  <div class="icon">
+                     <i class="fas fa-users"></i>
+                  </div>
+                  <a href="/user-{{key|value_to_link}}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+               </div>
+            </div>
+            {% endfor %}
+            {% endfor %}
+            {% endif %}
+            <div class="col-lg-2 col-6">
+               <!-- small box -->
+               <div class="small-box bg-success">
+                  <div class="inner">
+                     <h3>{{role_users}}</h3>
+                     <p>Total Users</p>
+                  </div>
+                  <div class="icon"></div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!-- /.container-fluid -->
+      <hr>
+      <div class="container-fluid">
+         <h5 class="mb-2">Product</h5>
+         <div class="row">
+            <div class="col-lg-2 col-6">
+               <!-- small card -->
+               <div class="small-box bg-success">
+                  <div class="inner">
+                     <h3>{{product_lists_counts}}</h3>
+                     <p>Total Products</p>
+                  </div>
+                  <div class="icon">
+                     <i class="ion ion-stats-bars"></i>
+                  </div>
+                  <a href="{% url 'backoffice:product_list' %}" class="small-box-footer">
+                  More info <i class="fas fa-arrow-circle-right"></i>
+                  </a>
+               </div>
+            </div>
+            <div class="col-lg-2 col-6">
+               <!-- small card -->
+               <div class="small-box bg-success">
+                  <div class="inner">
+                     <h3>{{product_inquiry_list_counts}}</h3>
+                     <p>Total Products Inquiry</p>
+                  </div>
+                  <div class="icon">
+                     <i class="ion ion-stats-bars"></i>
+                  </div>
+                  <a href="{% url 'backoffice:inquiry_list' %}" class="small-box-footer">
+                  More info <i class="fas fa-arrow-circle-right"></i>
+                  </a>
+               </div>
+            </div>
+         </div>
+      </div>
+   </section>
+   <!-- /.content -->
+</div>
+{% endblock content %}
+{% block script %}{% endblock script %}

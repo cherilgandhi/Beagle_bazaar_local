@@ -1,0 +1,200 @@
+open setting.py file form Beagle_backoffice file 
+
+setp 1 :
+
+    FORM :-
+
+    INSTALLED_APPS = [
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+        'widget_tweaks',
+        'backoffice',
+        'bizcred.apps.BizcredConfig',
+        'veloce.apps.VeloceConfig',
+        'veloces.apps.VelocesConfig',
+    ]
+
+    TO : -
+    INSTALLED_APPS = [
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+        'widget_tweaks',
+        #'backoffice',
+        #'bizcred.apps.BizcredConfig',
+        #'veloce.apps.VeloceConfig',
+        #'veloces.apps.VelocesConfig',
+    ]
+
+##################################################
+step 2 :
+    FORM:-
+
+        TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [TEMPLATES_DIRS,],
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.request',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                    'backoffice.context_processors.all_url',
+
+                ],
+            },
+        },
+    ]
+
+    TO:-
+    
+        TEMPLATES = [
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'DIRS': [TEMPLATES_DIRS,],
+                'APP_DIRS': True,
+                'OPTIONS': {
+                    'context_processors': [
+                        'django.template.context_processors.debug',
+                        'django.template.context_processors.request',
+                        'django.contrib.auth.context_processors.auth',
+                        'django.contrib.messages.context_processors.messages',
+                        #'backoffice.context_processors.all_url',
+
+                    ],
+                },
+            },
+        ]
+
+
+##################################################
+step 3 :
+
+    change database from multiple to single (take auth_db database to default )
+
+    FORM :-
+
+    DATABASES = {
+        'default': {},
+        'auth_db': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'beagle_backoffice_dev_ravi',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        },
+        'bizcred_db': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'bizcred_innovation_ravi',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        },
+        'veloce1_db': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'Market_ravi',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        },
+        'veloce2_db': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'fintech_ravi',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        },
+    }
+
+    TO :-
+
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.db.backends.postgresql',
+    #         'NAME': 'beagle_backoffice_dev_ravi',
+    #         'USER': 'postgres',
+    #         'PASSWORD': 'postgres',
+    #         'HOST': 'localhost',
+    #         'PORT': '5432',
+    #     }
+    # }
+
+##################################################
+step 4 :
+
+    FORM:-
+        DATABASE_ROUTERS = ['routers.db_routers.AuthRouter', 
+                    'routers.db_routers.BizcredConfig',
+                    ]
+
+    TO :-
+        #DATABASE_ROUTERS = ['routers.db_routers.AuthRouter', 
+        #            'routers.db_routers.BizcredConfig',
+        #            ]
+
+##################################################
+
+open urls.py file form Beagle_backoffice file 
+step 5 :
+
+    FORM : -
+
+        urlpatterns = [
+            path('admin/', admin.site.urls),
+            
+            path('', include('backoffice.urls')),
+            path('bizcred/',include('bizcred.urls')),
+            path('store/',include('veloce.urls')),
+            path('fintech/',include('veloces.urls')),
+            
+            
+        ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    TO : -
+
+        urlpatterns = [
+            path('admin/', admin.site.urls),
+            
+            #path('', include('backoffice.urls')),
+            #path('bizcred/',include('bizcred.urls')),
+            #path('store/',include('veloce.urls')),
+            #path('fintech/',include('veloces.urls')),
+            
+            
+        ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+##################################################
+
+*** after install django and requirement_live.txt follow below steps ***
+
+step 6 :
+    # pip install django-widget-tweaks
+    # python manage.py makemigrations
+    # python manage.py createsuperuser
+
+##################################################
+go to setting file and make the settings TO -> FORM all the files
+step 7 :
+    #python manage.py makemigrations
+    #python manage.py migrate --database=auth_db
+    #python manage.py migrate --database=bizcred_db
+    #python manage.py migrate --database=veloce1_db
+    #python manage.py migrate --database=veloce2_db
+    #python manage.py migrate --run-syncdb
+
+##################################################
+go to admin add check the database is configure properly by opening the module and entering the query 
+step 7 :
+    python manage.py runserver
